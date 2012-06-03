@@ -1,7 +1,7 @@
 #include "OLEDUtil.h"
 
 // Gets an individual byte from a multibyte value.
-uint8_t OLEDUtil::GetByte(uint32_t value, uint8_t zeroBasedByteFromRight)
+uint8_t OLEDUtil::getByte(uint32_t value, uint8_t zeroBasedByteFromRight)
 {
     return value >> (zeroBasedByteFromRight * 8) & 0xFF;
 }
@@ -10,7 +10,7 @@ uint8_t OLEDUtil::GetByte(uint32_t value, uint8_t zeroBasedByteFromRight)
 // e.g. 0x10 as 10 instead of 16
 // Returns false if the value is invalid
 // e.g. 0x1c
-bool OLEDUtil::ReadHexAsDec(uint8_t value, uint8_t& result)
+bool OLEDUtil::readHexAsDec(uint8_t value, uint8_t& result)
 {
     uint8_t digit1 = value >> 4;
     uint8_t digit2 = value & 0x0F;
@@ -22,7 +22,7 @@ bool OLEDUtil::ReadHexAsDec(uint8_t value, uint8_t& result)
 }
 
 // Blinks an LED. derp.
-void OLEDUtil::BlinkLED(uint8_t pin, uint8_t numTimes, uint16_t blinkDelayMs)
+void OLEDUtil::blinkLED(uint8_t pin, uint8_t numTimes, uint16_t blinkDelayMs)
 {
     digitalWrite(pin, LOW);
     for (uint8_t i = 0; i < numTimes; i++)
@@ -36,7 +36,7 @@ void OLEDUtil::BlinkLED(uint8_t pin, uint8_t numTimes, uint16_t blinkDelayMs)
 }
 
 // Converts e.g. (uint8_t)0xFF to (String)"0xFF"
-String OLEDUtil::ByteToString(uint8_t data)
+String OLEDUtil::byteToString(uint8_t data)
 {
     const char *table = "0123456789ABCDEF";
     char result[3];
@@ -47,35 +47,44 @@ String OLEDUtil::ByteToString(uint8_t data)
 }
 
 // Converts e.g. (uint16_t)0xFFFF to (String)"0xFFFF"
-String OLEDUtil::ShortToString(uint16_t data)
+String OLEDUtil::shortToString(uint16_t data)
 {
     return
-        ByteToString(GetByte(data,1)) +
-        ByteToString(GetByte(data,0));
+        byteToString(getByte(data,1)) +
+        byteToString(getByte(data,0));
 }
 
 // Converts e.g. (uint32_t)0xFFFFFFFF to (String)"0xFFFFFFFF"
-String OLEDUtil::LongToString(uint32_t data)
+String OLEDUtil::longToString(uint32_t data)
 {
     return
-        ShortToString(data >> 16) +
-        ShortToString(data & 0xFFFF);
+        shortToString(data >> 16) +
+        shortToString(data & 0xFFFF);
 }
 
 // Converts an analog reading to a voltage float value.
-float OLEDUtil::AnalogToVoltage(uint16_t value, float refVoltage)
+float OLEDUtil::analogToVoltage(uint16_t value, float refVoltage)
 {
     return (refVoltage / 1024.0) * value;
 }
 
 // Scales an analog reading to a value based on another scale.
-uint16_t OLEDUtil::ScaleAnalog(uint16_t value, uint16_t max)
+uint16_t OLEDUtil::scaleAnalog(uint16_t value, uint16_t max)
 {
-    return ConvertValueScale(value, 1024, max);
+    return convertValueScale(value, 1024, max);
 }
 
 // Converts the scale of a value to another scale.
-uint16_t OLEDUtil::ConvertValueScale(uint16_t value, uint16_t valueScale, uint16_t targetScale)
+uint16_t OLEDUtil::convertValueScale(uint16_t value, uint16_t valueScale, uint16_t targetScale)
 {
     return targetScale * 1000 / valueScale * value / 1000;
+}
+
+uint16_t OLEDUtil::checkMemory() {
+    uint8_t *heapptr, *stackptr;
+    stackptr = (uint8_t *)malloc(4);          // use stackptr temporarily
+    heapptr = stackptr;                     // save value of heap pointer
+    free(stackptr);      // free up the memory again (sets stackptr to 0)
+    stackptr =  (uint8_t *)(SP);           // save value of stack pointer
+    return stackptr - heapptr;
 }

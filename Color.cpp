@@ -4,28 +4,28 @@
 
 Color::Color()
 {
-    init(0,0,0);
+    _init(0,0,0);
 }
 
 Color::Color(uint8_t red, uint8_t green, uint8_t blue)
 {
-    init(red, green, blue);
+    _init(red, green, blue);
 }
 
-void Color::init(uint8_t red, uint8_t green, uint8_t blue)
+void Color::_init(uint8_t red, uint8_t green, uint8_t blue)
 {
-    SetRed(red);
-    SetGreen(green);
-    SetBlue(blue);
+    setRed(red);
+    setGreen(green);
+    setBlue(blue);
 }
 
 
-Color Color::FromRGB(uint8_t red, uint8_t green, uint8_t blue)
+Color Color::fromRGB(uint8_t red, uint8_t green, uint8_t blue)
 {
     return Color(red, green, blue);
 }
 
-Color Color::From16BitRGB(uint16_t colorShort)
+Color Color::from16BitRGB(uint16_t colorShort)
 {
     uint8_t redComponent = colorShort >> 11;
     uint8_t greenComponent = colorShort >> 5 & 0x3f;
@@ -36,7 +36,7 @@ Color Color::From16BitRGB(uint16_t colorShort)
         blueComponent << 3);
 }
 
-Color Color::From32BitRGB(uint32_t colorLong)
+Color Color::from32BitRGB(uint32_t colorLong)
 {
     return Color(
         colorLong >> 16 & 0xFF,
@@ -45,30 +45,30 @@ Color Color::From32BitRGB(uint32_t colorLong)
 }
 
 
-Color Color::Random()
+Color Color::rand()
 {
     return Color(random(255),random(255),random(255));
 }
 
-Color Color::Random(uint8_t max)
+Color Color::rand(uint8_t max)
 {
     return Color(random(max),random(max),random(max));
 }
 
-Color Color::Random(uint8_t min, uint8_t max)
+Color Color::rand(uint8_t min, uint8_t max)
 {
     return Color(random(min,max),random(min,max),random(min,max));
 }
 
 
-Color Color::Blend(Color color1, Color color2, uint8_t color1Amount)
+Color Color::blend(Color color1, Color color2, uint8_t color1Amount)
 {
-    return From32BitRGB(Blend32Bit(color1.To32BitRGB(), color2.To32BitRGB(), color1Amount));
+    return from32BitRGB(blend32Bit(color1.to32BitRGB(), color2.to32BitRGB(), color1Amount));
 }
 
-// Blends two colors together using 32-bit color values.
+// blends two colors together using 32-bit color values.
 // color1Amount determines how dominant color1 is in the blend.
-uint32_t Color::Blend32Bit(uint32_t color1, uint32_t color2, uint8_t color1Amount)
+uint32_t Color::blend32Bit(uint32_t color1, uint32_t color2, uint8_t color1Amount)
 {
     // Separate the green from the red/blue,
     // use the space left of the color values to multiply
@@ -93,21 +93,21 @@ uint32_t Color::Blend32Bit(uint32_t color1, uint32_t color2, uint8_t color1Amoun
     return (rb | g) >> 8;
 }
 
-uint16_t Color::Blend16Bit(uint16_t color1, uint16_t color2, uint8_t color1Amount)
+uint16_t Color::blend16Bit(uint16_t color1, uint16_t color2, uint8_t color1Amount)
 {
     // TODO: find a simple method of blending 16-bit colors, this is icky =/
-    return To16BitRGB(
-        Blend32Bit( To32BitRGB(color1), To32BitRGB(color2), color1Amount)
+    return to16BitRGB(
+        blend32Bit( to32BitRGB(color1), to32BitRGB(color2), color1Amount)
         );
 }
 
 
-uint16_t Color::To16BitRGB()
+uint16_t Color::to16BitRGB()
 {
-    return To16BitRGB(_red, _green, _blue);
+    return to16BitRGB(_red, _green, _blue);
 }
 
-uint16_t Color::To16BitRGB(uint8_t red, uint8_t green, uint8_t blue)
+uint16_t Color::to16BitRGB(uint8_t red, uint8_t green, uint8_t blue)
 {
     uint8_t r = red >> 3;
     uint8_t g = green >> 2;
@@ -122,61 +122,61 @@ uint16_t Color::To16BitRGB(uint8_t red, uint8_t green, uint8_t blue)
     return result;
 }
 
-uint16_t Color::To16BitRGB(uint32_t colorLong)
+uint16_t Color::to16BitRGB(uint32_t colorLong)
 {
-    return To16BitRGB(
-        OLEDUtil::GetByte(colorLong, 2),
-        OLEDUtil::GetByte(colorLong, 1),
-        OLEDUtil::GetByte(colorLong, 0));
+    return to16BitRGB(
+        OLEDUtil::getByte(colorLong, 2),
+        OLEDUtil::getByte(colorLong, 1),
+        OLEDUtil::getByte(colorLong, 0));
 }
 
 
-uint32_t Color::To32BitRGB()
+uint32_t Color::to32BitRGB()
 {
-    return To32BitRGB(_red, _green, _blue);
+    return to32BitRGB(_red, _green, _blue);
 }
 
-uint32_t Color::To32BitRGB(uint8_t red, uint8_t green, uint8_t blue)
+uint32_t Color::to32BitRGB(uint8_t red, uint8_t green, uint8_t blue)
 {
     return ((uint32_t)red << 16) + ((uint32_t)green << 8) + blue;
 }
 
-uint32_t Color::To32BitRGB(uint16_t colorShort)
+uint32_t Color::to32BitRGB(uint16_t colorShort)
 {
-    return To32BitRGB(
+    return to32BitRGB(
         colorShort >> 11,
         colorShort >> 5 & 0x3f,
         colorShort & 0x1f);
 }
 
 
-uint8_t Color::GetRed()
+uint8_t Color::getRed()
 {
     return _red;
 }
 
-uint8_t Color::GetGreen()
+uint8_t Color::getGreen()
 {
     return _green;
 }
 
-uint8_t Color::GetBlue()
+uint8_t Color::getBlue()
 {
     return _blue;
 }
 
 
-void Color::SetRed(uint8_t value)
+void Color::setRed(uint8_t value)
 {
     _red = value;
 }
 
-void Color::SetGreen(uint8_t value)
+void Color::setGreen(uint8_t value)
 {
     _green = value;
 }
 
-void Color::SetBlue(uint8_t value)
+void Color::setBlue(uint8_t value)
 {
     _blue = value;
 }

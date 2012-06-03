@@ -57,14 +57,14 @@ int8_t vector[NUM_SHAPES][NUM_POINTS][2];
 
 void setup()
 {
-    bool init = oled.Init();
+    bool init = oled.init();
 
     for (uint8_t s = 0; s < NUM_SHAPES; s++)
     {
         // Randomize the starting color of each shape
         // This is an OLED "screensaver", so let's use darker colors
         // by limiting SHAPECOLOR_MAX to a lowish value
-        color[s] = Color::Random(SHAPECOLOR_MAX).To16BitRGB();
+        color[s] = Color::rand(SHAPECOLOR_MAX).to16BitRGB();
 
         for (uint8_t p = 0; p < NUM_POINTS; p++)
         {
@@ -72,8 +72,8 @@ void setup()
             // [1] -> Y
 
             // Randomize the starting pos of each vertex
-            pos[s][p][0] = random(oled.GetDeviceWidth());
-            pos[s][p][1] = random(oled.GetDeviceHeight());
+            pos[s][p][0] = random(oled.getDeviceWidth());
+            pos[s][p][1] = random(oled.getDeviceHeight());
 
             // Randomize the movement vector of each vertex
             // Move no more than 2 units in any direction per update
@@ -95,7 +95,7 @@ void loop()
             for (uint8_t c = 0; c < 2; c++)
             {
                 // Bounce when outside screen bounds
-                int16_t maxDimension = (c == 0 ? oled.GetDeviceWidth() : oled.GetDeviceHeight());
+                int16_t maxDimension = (c == 0 ? oled.getDeviceWidth() : oled.getDeviceHeight());
                 int16_t tempPos = pos[s][p][c] + vector[s][p][c];
 
                 if (tempPos < 0 || tempPos >= maxDimension)
@@ -111,11 +111,11 @@ void loop()
         }
 
         // Shift colors for each shape over time
-        color[s] = Color::Blend(Color::From16BitRGB(color[s]),
-            Color::Random(SHAPECOLOR_MAX), 230).To16BitRGB();
+        color[s] = Color::blend(Color::from16BitRGB(color[s]),
+            Color::rand(SHAPECOLOR_MAX), 230).to16BitRGB();
         
         // Draw the polygons
-        oled.DrawPolygon(color[s], NUM_POINTS, pos[s]);
+        oled.drawPolygon(color[s], NUM_POINTS, pos[s]);
     }
 
     delay(10);
