@@ -66,17 +66,20 @@ Color Color::Blend(Color color1, Color color2, uint8_t color1Amount)
     return From32BitRGB(Blend32Bit(color1.To32BitRGB(), color2.To32BitRGB(), color1Amount));
 }
 
-
 // Blends two colors together using 32-bit color values.
 // color1Amount determines how dominant color1 is in the blend.
 uint32_t Color::Blend32Bit(uint32_t color1, uint32_t color2, uint8_t color1Amount)
 {
+    // Separate the green from the red/blue,
+    // use the space left of the color values to multiply
     uint32_t rbMask = 0x00FF00FF;
     uint32_t gMask = 0x0000FF00;
     uint32_t rbFinalMask = 0xFF00FF00;
     uint32_t gFinalMask = 0x00FF0000;
     uint8_t color2Amount = 256 - color1Amount;
     
+    // Remove whatever is in the original color positions,
+    // leaving the most significant bits of each color
     uint32_t rb =
         (((color1 & rbMask) * color1Amount) +
         ((color2 & rbMask) * color2Amount)) &
@@ -86,13 +89,16 @@ uint32_t Color::Blend32Bit(uint32_t color1, uint32_t color2, uint8_t color1Amoun
         ((color2 & gMask) * color2Amount)) &
         gFinalMask;
 
+    // Recombine and shift back over to the standard positions
     return (rb | g) >> 8;
 }
 
 uint16_t Color::Blend16Bit(uint16_t color1, uint16_t color2, uint8_t color1Amount)
 {
     // TODO: find a simple method of blending 16-bit colors, this is icky =/
-    return To16BitRGB( Blend32Bit( To32BitRGB(color1), To32BitRGB(color2), color1Amount) );
+    return To16BitRGB(
+        Blend32Bit( To32BitRGB(color1), To32BitRGB(color2), color1Amount)
+        );
 }
 
 
