@@ -75,12 +75,12 @@ uint32_t Color::Blend32Bit(uint32_t color1, uint32_t color2, uint8_t color1Amoun
     uint8_t color2Amount = 256 - color1Amount;
     
     uint32_t rb =
-        ((color1 & rbMask) * color1Amount) +
-        ((color2 & rbMask) * color2Amount) &
+        (((color1 & rbMask) * color1Amount) +
+        ((color2 & rbMask) * color2Amount)) &
         rbFinalMask;
     uint32_t g =
-        ((color1 & gMask) * color1Amount) +
-        ((color2 & gMask) * color2Amount) &
+        (((color1 & gMask) * color1Amount) +
+        ((color2 & gMask) * color2Amount)) &
         gFinalMask;
 
     return (rb | g) >> 8;
