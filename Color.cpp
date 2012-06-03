@@ -2,34 +2,30 @@
 
 #include "OLEDUtil.h"
 
-Color::Color(bool readonly)
+Color::Color()
 {
-    init(0,0,0,readonly);
+    init(0,0,0);
 }
 
-Color::Color(uint8_t red, uint8_t green, uint8_t blue, bool readonly)
+Color::Color(uint8_t red, uint8_t green, uint8_t blue)
 {
-    init(red, green, blue, readonly);
+    init(red, green, blue);
 }
 
-void Color::init(uint8_t red, uint8_t green, uint8_t blue, bool readonly)
+void Color::init(uint8_t red, uint8_t green, uint8_t blue)
 {
-    _readonly = false;
-
     SetRed(red);
     SetGreen(green);
     SetBlue(blue);
-
-    _readonly = readonly;
 }
 
 
-Color Color::FromRGB(uint8_t red, uint8_t green, uint8_t blue, bool readonly)
+Color Color::FromRGB(uint8_t red, uint8_t green, uint8_t blue)
 {
-    return Color(red, green, blue, readonly);
+    return Color(red, green, blue);
 }
 
-Color Color::From16BitRGB(uint16_t colorShort, bool readonly)
+Color Color::From16BitRGB(uint16_t colorShort)
 {
     uint8_t redComponent = colorShort >> 11;
     uint8_t greenComponent = colorShort >> 5 & 0x3f;
@@ -37,17 +33,15 @@ Color Color::From16BitRGB(uint16_t colorShort, bool readonly)
     return Color(
         redComponent << 3,
         greenComponent << 2,
-        blueComponent << 3,
-        readonly);
+        blueComponent << 3);
 }
 
-Color Color::From32BitRGB(uint32_t colorLong, bool readonly)
+Color Color::From32BitRGB(uint32_t colorLong)
 {
     return Color(
         colorLong >> 16 & 0xFF,
         colorLong >> 8 & 0xFF,
-        colorLong & 0xFF,
-        readonly);
+        colorLong & 0xFF);
 }
 
 
@@ -94,6 +88,7 @@ uint32_t Color::Blend32Bit(uint32_t color1, uint32_t color2, uint8_t color1Amoun
 
 uint16_t Color::Blend16Bit(uint16_t color1, uint16_t color2, uint8_t color1Amount)
 {
+    // TODO: find a simple method of blending 16-bit colors, this is icky =/
     return To16BitRGB( Blend32Bit( To32BitRGB(color1), To32BitRGB(color2), color1Amount) );
 }
 
@@ -121,9 +116,9 @@ uint16_t Color::To16BitRGB(uint8_t red, uint8_t green, uint8_t blue)
 uint16_t Color::To16BitRGB(uint32_t colorLong)
 {
     return To16BitRGB(
-        OLEDUtil::GetByte(colorLong, 3),
         OLEDUtil::GetByte(colorLong, 2),
-        OLEDUtil::GetByte(colorLong, 1));
+        OLEDUtil::GetByte(colorLong, 1),
+        OLEDUtil::GetByte(colorLong, 0));
 }
 
 
@@ -139,10 +134,10 @@ uint32_t Color::To32BitRGB(uint8_t red, uint8_t green, uint8_t blue)
 
 uint32_t Color::To32BitRGB(uint16_t colorShort)
 {
-        return To32BitRGB(
-            colorShort >> 11,
-            colorShort >> 5 & 0x3f,
-            colorShort & 0x1f);
+    return To32BitRGB(
+        colorShort >> 11,
+        colorShort >> 5 & 0x3f,
+        colorShort & 0x1f);
 }
 
 
@@ -162,24 +157,18 @@ uint8_t Color::GetBlue()
 }
 
 
-bool Color::SetRed(uint8_t value)
+void Color::SetRed(uint8_t value)
 {
-    if (_readonly) return false;
     _red = value;
-    return true;
 }
 
-bool Color::SetGreen(uint8_t value)
+void Color::SetGreen(uint8_t value)
 {
-    if (_readonly) return false;
     _green = value;
-    return true;
 }
 
-bool Color::SetBlue(uint8_t value)
+void Color::SetBlue(uint8_t value)
 {
-    if (_readonly) return false;
     _blue = value;
-    return true;
 }
 

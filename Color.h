@@ -7,12 +7,12 @@
 struct Color
 {
 public:
-    Color(bool readonly = false);
-    Color(uint8_t red, uint8_t green, uint8_t blue, bool readonly = false);
+    Color();
+    Color(uint8_t red, uint8_t green, uint8_t blue);
     
-    static Color FromRGB(uint8_t red, uint8_t green, uint8_t blue, bool readonly = false);
-    static Color From16BitRGB(uint16_t colorShort, bool readonly = false);
-    static Color From32BitRGB(uint32_t colorLong, bool readonly = false);
+    static Color FromRGB(uint8_t red, uint8_t green, uint8_t blue);
+    static Color From16BitRGB(uint16_t colorShort);
+    static Color From32BitRGB(uint32_t colorLong);
 
     static Color Random();
     static Color Random(uint8_t max);
@@ -34,12 +34,12 @@ public:
     uint8_t GetGreen();
     uint8_t GetBlue();
 
-    bool SetRed(uint8_t value);
-    bool SetGreen(uint8_t value);
-    bool SetBlue(uint8_t value);
+    void SetRed(uint8_t value);
+    void SetGreen(uint8_t value);
+    void SetBlue(uint8_t value);
 
 private:
-    void init(uint8_t red, uint8_t green, uint8_t blue, bool readonly);
+    void init(uint8_t red, uint8_t green, uint8_t blue);
 
     bool _readonly;
 
