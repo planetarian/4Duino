@@ -66,6 +66,9 @@ Color Color::Blend(Color color1, Color color2, uint8_t color1Amount)
     return From32BitRGB(Blend32Bit(color1.To32BitRGB(), color2.To32BitRGB(), color1Amount));
 }
 
+
+// Blends two colors together using 32-bit color values.
+// color1Amount determines how dominant color1 is in the blend.
 uint32_t Color::Blend32Bit(uint32_t color1, uint32_t color2, uint8_t color1Amount)
 {
     uint32_t rbMask = 0x00FF00FF;
