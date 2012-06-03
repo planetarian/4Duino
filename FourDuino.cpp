@@ -738,6 +738,7 @@ bool OLED::ScreenCopyPaste(uint8_t sourceX, uint8_t sourceY, uint8_t destX, uint
 {
     Write(7, OLED_CMD_SCREEN_COPY_PASTE, sourceX, sourceY, destX, destY,
         sourceWidth, sourceHeight);
+    return GetAck();
 }
 
 
@@ -1194,15 +1195,17 @@ bool OLED::SDWriteLong(uint16_t numValues, uint32_t value1, ...)
 bool OLED::SDWriteText(char* text)
 {
     for(uint8_t c = 0; c < strlen(text); c++)
-        SDWrite(text[c]);
-    SDWrite(0x00);
+        if (!SDWrite(text[c]))
+            return false;
+    return SDWrite(0x00);
 }
 
 bool OLED::SDWriteString(String text)
 {
     for(uint8_t c = 0; c < text.length(); c++)
-        SDWrite(text[c]);
-    SDWrite(0x00);
+        if (!SDWrite(text[c]))
+            return false;
+    return SDWrite(0x00);
 }
 
 

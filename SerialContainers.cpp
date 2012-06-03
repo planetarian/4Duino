@@ -1,13 +1,6 @@
 #include "SerialContainers.h"
 
 SerialContainer::SerialContainer(){}
-void SerialContainer::begin(uint32_t baudRate) {}
-void SerialContainer::end() {}
-int SerialContainer::available() {}
-int SerialContainer::peek() {}
-int SerialContainer::read() {}
-void SerialContainer::flush() {}
-size_t SerialContainer::write(uint8_t data) {}
 
 
 
