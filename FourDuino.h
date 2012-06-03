@@ -96,6 +96,8 @@
 #define OLED_PRM_DRAW_IMAGE_16BIT	0x10
 #define OLED_PRM_SET_PEN_SIZE_FILL	0x00
 #define OLED_PRM_SET_PEN_SIZE_EMPTY	0x01
+#define OLED_MAX_USER_BITMAPS       32
+#define OLED_MAX_POLYGON_VERTICES   7
 
 //
 // Text commands
@@ -122,10 +124,17 @@
 #define OLED_FONT_PROPORTIONAL		0x10
 #define OLED_FONT_NONPROPORTIONAL	0x00
 #define OLED_FONT_PROPORTIONAL_NOT_SET	0xFF
-#define OLED_FONT_COLOR_DEFAULT		Color(255,255,255) // COLOR_WHITE
+
+#define OLED_FONT_COLOR_DEFAULT		    Color(255,255,255) // COLOR_WHITE
 #define OLED_BUTTON_FONT_COLOR_DEFAULT  Color::from32BitRGB(0xC0C0C0) // COLOR_SILVER
 #define OLED_BUTTON_COLOR_DEFAULT       Color::from32BitRGB(0x708090) // COLOR_SLATEGRAY
-#define OLED_PROGRESSBAR_COLOR_DEFAULT  Color::from32BitRGB(0x2f4f4f) // COLOR_DARKSLATEGRAY
+#define OLED_PROGRESSBAR_COLOR_FORE_DEFAULT Color::from32BitRGB(0x2f4f4f) // COLOR_DARKSLATEGRAY
+#define OLED_PROGRESSBAR_COLOR_BACK_DEFAULT Color::from32BitRGB(0x182828)
+
+#define OLED_FONT_SIZE_DEFAULT          OLED_FONT_SMALL
+#define OLED_FONT_OPACITY_DEFAULT       false
+#define OLED_FONT_PROPORTIONAL_DEFAULT  false
+#define OLED_BUTTON_OPACITY_DEFAULT     false
 
 //
 // SD Card commands
@@ -325,6 +334,8 @@ public:
 private:
     String _convertDeviceType(uint8_t deviceTypeResponse);
     uint16_t _convertResolution(uint8_t resolutionResponse);
+
+    static bool _checkDrawTextParameters(uint8_t fontSize, uint8_t opacity, uint8_t proportional);
 
     uint8_t _pinReset;
     uint16_t _initDelay;

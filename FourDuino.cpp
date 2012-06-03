@@ -1,7 +1,6 @@
 #include "FourDuino.h"
 
 
-
 OLED::OLED(uint8_t pinReset, HardwareSerial serial, uint32_t baudRate, uint16_t initDelay)
 {
     _pinReset = pinReset;
@@ -36,7 +35,7 @@ bool OLED::init()
     _fontProportional = OLED_FONT_NONPROPORTIONAL;
 
 
-    for (uint8_t i = 0; i < 32; i++)
+    for (uint8_t i = 0; i < OLED_MAX_USER_BITMAPS; i++)
         _charIndexList[i] = false;
 
     pinMode(_pinReset, OUTPUT);
@@ -57,18 +56,18 @@ bool OLED::init()
         return false;
 
     getDeviceInfo(false);
-    if (_deviceWidth > 255 || _deviceHeight > 255)
+    if (_deviceWidth > 0xFF || _deviceHeight > 0xFF)
     {
         // This device is not supported, x/y are out of bounds.
         // Reset to ensure no further commands can be used.
         reset();
         return false;
     }
-    setFont(OLED_FONT_SMALL);
-    setFontOpacity(OLED_FONT_TRANSPARENT);
-    setFontProportional(OLED_FONT_NONPROPORTIONAL);
+    setFont(OLED_FONT_SIZE_DEFAULT);
+    setFontOpacity(OLED_FONT_OPACITY_DEFAULT);
+    setFontProportional(OLED_FONT_PROPORTIONAL_DEFAULT);
     setFontColor(OLED_FONT_COLOR_DEFAULT);
-    setButtonOpacity(false);
+    setButtonOpacity(OLED_BUTTON_OPACITY_DEFAULT);
     setButtonColor(OLED_BUTTON_COLOR_DEFAULT);
     setButtonFontColor(OLED_BUTTON_FONT_COLOR_DEFAULT);
     return true;
@@ -293,12 +292,12 @@ bool OLED::getDeviceInfo(bool displayOnScreen)
 String OLED::getDeviceType() { return _deviceType; }
 uint8_t OLED::getDeviceWidth()
 { 
-    return _deviceWidth > 255
+    return _deviceWidth > 0xFF
         ? 0 : (uint8_t)_deviceWidth;
 }
 uint8_t OLED::getDeviceHeight()
 {
-    return _deviceHeight > 255
+    return _deviceHeight > 0xFF
         ? 0 : (uint8_t)_deviceHeight;
 }
 uint8_t OLED::getHardwareRevision() { return _hardwareRevision; }
@@ -488,8 +487,8 @@ bool OLED::tune(uint8_t length, uint16_t note, uint16_t duration)
 
 bool OLED::readPixel(uint8_t x, uint8_t y, uint16_t& resultShort)
 {
-    if (x < 0 || x >= _deviceWidth ||
-        y < 0 || y >= _deviceHeight)
+    if (x < 0 || x >= getDeviceWidth() ||
+        y < 0 || y >= getDeviceHeight())
         return false;
     write(3, OLED_CMD_READ_PIXEL, x, y);
     
@@ -595,8 +594,8 @@ bool OLED::drawTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t 
 
 bool OLED::drawPolygonV(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, va_list ap)
 {
-    // No more than 7 vertices
-    if (numVertices > 7)
+    // Vertex count limited by the serial interface
+    if (numVertices > OLED_MAX_POLYGON_VERTICES)
         return false;
     // Polygon must be at least 3 vertices, but no reason to flat-out reject it...
     if (numVertices == 1)
@@ -632,7 +631,7 @@ bool OLED::drawPolygon(Color color, uint8_t numVertices, uint8_t x1, uint8_t y1,
 
 bool OLED::drawPolygon(uint16_t color, uint8_t numVertices, uint8_t vertices[][2])
 {
-    if (numVertices > 7) return false;
+    if (numVertices > OLED_MAX_POLYGON_VERTICES) return false;
     if (numVertices == 1)
         return drawPixel(vertices[0][0], vertices[0][1], color);
     if (numVertices == 2)
@@ -824,18 +823,9 @@ void OLED::setFontProportional(bool proportional)
 bool OLED::drawText(uint8_t col, uint8_t row, String text, uint16_t color,
     uint8_t fontSize, uint8_t opacity, uint8_t proportional)
 {
-    if ((fontSize != OLED_FONT_SMALL &&
-        fontSize != OLED_FONT_MEDIUM &&
-        fontSize != OLED_FONT_LARGE &&
-        fontSize != OLED_FONT_SIZE_NOT_SET) ||
-        (proportional != OLED_FONT_PROPORTIONAL &&
-        proportional != OLED_FONT_NONPROPORTIONAL &&
-        proportional != OLED_FONT_PROPORTIONAL_NOT_SET) ||
-        (opacity != OLED_FONT_OPAQUE &&
-        opacity != OLED_FONT_TRANSPARENT &&
-        opacity != OLED_FONT_OPACITY_NOT_SET))
+    if (!_checkDrawTextParameters(fontSize, opacity, proportional))
         return false;
-    
+
     if (fontSize == OLED_FONT_SIZE_NOT_SET)
         fontSize = _fontSize;
 
@@ -877,16 +867,7 @@ bool OLED::drawText(uint8_t col, uint8_t row, String text)
 bool OLED::drawTextGraphic(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height,
     uint16_t color,	uint8_t fontSize, uint8_t opacity, uint8_t proportional)
 {
-    if ((fontSize != OLED_FONT_SMALL &&
-        fontSize != OLED_FONT_MEDIUM &&
-        fontSize != OLED_FONT_LARGE &&
-        fontSize != OLED_FONT_SIZE_NOT_SET) ||
-        (proportional != OLED_FONT_PROPORTIONAL &&
-        proportional != OLED_FONT_NONPROPORTIONAL &&
-        proportional != OLED_FONT_PROPORTIONAL_NOT_SET) ||
-        (opacity != OLED_FONT_OPAQUE &&
-        opacity != OLED_FONT_TRANSPARENT &&
-        opacity != OLED_FONT_OPACITY_NOT_SET) ||
+    if (!_checkDrawTextParameters(fontSize, opacity, proportional) ||
         width < 1 || height < 1)
         return false;
     
@@ -937,16 +918,7 @@ bool OLED::drawTextButton(uint8_t x, uint8_t y, String text, uint8_t width, uint
     bool pressed, uint16_t fontColor, uint16_t buttonColor,
     uint8_t fontSize, uint8_t opacity, uint8_t proportional)
 {
-    if ((fontSize != OLED_FONT_SMALL &&
-        fontSize != OLED_FONT_MEDIUM &&
-        fontSize != OLED_FONT_LARGE &&
-        fontSize != OLED_FONT_SIZE_NOT_SET) ||
-        (proportional != OLED_FONT_PROPORTIONAL &&
-        proportional != OLED_FONT_NONPROPORTIONAL &&
-        proportional != OLED_FONT_PROPORTIONAL_NOT_SET) ||
-        (opacity != OLED_FONT_OPAQUE &&
-        opacity != OLED_FONT_TRANSPARENT &&
-        opacity != OLED_FONT_OPACITY_NOT_SET) ||
+    if (!_checkDrawTextParameters(fontSize, opacity, proportional) ||
         width < 1 || height < 1)
         return false;
     
@@ -1005,6 +977,24 @@ bool OLED::drawTextButton(uint8_t x, uint8_t y, String text, uint8_t width, uint
 {
     return drawTextButton(x, y, text, width, height, pressed, _fontColor, _buttonColor,
         OLED_FONT_SIZE_NOT_SET, OLED_FONT_OPACITY_NOT_SET, OLED_FONT_PROPORTIONAL_NOT_SET);
+}
+
+
+bool OLED::_checkDrawTextParameters(uint8_t fontSize, uint8_t opacity, uint8_t proportional)
+{
+    // TODO: Do this better
+    return (fontSize == OLED_FONT_SMALL ||
+        fontSize == OLED_FONT_MEDIUM ||
+        fontSize == OLED_FONT_LARGE ||
+        fontSize == OLED_FONT_SIZE_NOT_SET)
+        &&
+        (proportional == OLED_FONT_PROPORTIONAL ||
+        proportional == OLED_FONT_NONPROPORTIONAL ||
+        proportional == OLED_FONT_PROPORTIONAL_NOT_SET)
+        &&
+        (opacity == OLED_FONT_OPAQUE ||
+        opacity == OLED_FONT_TRANSPARENT ||
+        opacity == OLED_FONT_OPACITY_NOT_SET);
 }
 
 
@@ -1270,7 +1260,8 @@ bool OLED::SDWipeSectors(uint32_t sectorAddress, uint32_t numSectors,
             percent = sector * 100 / numSectors;
             
             drawProgressBar(0, height-9, width, 9, percent,
-                OLED_PROGRESSBAR_COLOR_DEFAULT, Color::from32BitRGB(0x182828));
+                OLED_PROGRESSBAR_COLOR_FORE_DEFAULT,
+                OLED_PROGRESSBAR_COLOR_BACK_DEFAULT);
             
             String output = "s:" + (String)sector + " (" + percent + "%)";
             drawTextGraphic(1, height-8, output, 1, 1,
@@ -1289,7 +1280,7 @@ bool OLED::SDWipeSectors(uint32_t sectorAddress, uint32_t numSectors,
     
     if (displayProgress && success)
     {
-        drawRectangleWH(0, height-9, width, 9, OLED_PROGRESSBAR_COLOR_DEFAULT);
+        drawRectangleWH(0, height-9, width, 9, OLED_PROGRESSBAR_COLOR_FORE_DEFAULT);
         drawTextGraphic(1, height-8, "s:"+(String)sectorsWiped+" (100%)", 1, 1,
             OLED_FONT_COLOR_DEFAULT,
             OLED_FONT_SMALL, OLED_FONT_TRANSPARENT, OLED_FONT_PROPORTIONAL);
