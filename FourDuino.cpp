@@ -1269,12 +1269,13 @@ bool OLED::SDWipeSectors(uint32_t sectorAddress, uint32_t numSectors,
 
             percent = sector * 100 / numSectors;
             
-            drawProgressBar(0,height-9,width,9,
-                percent, COLOR_DARKSLATEGRAY, Color::from32BitRGB(0x182828));
+            drawProgressBar(0, height-9, width, 9, percent,
+                OLED_PROGRESSBAR_COLOR_DEFAULT, Color::from32BitRGB(0x182828));
             
             String output = "s:" + (String)sector + " (" + percent + "%)";
             drawTextGraphic(1, height-8, output, 1, 1,
-                COLOR_WHITE, OLED_FONT_SMALL, OLED_FONT_TRANSPARENT, OLED_FONT_PROPORTIONAL);
+                OLED_FONT_COLOR_DEFAULT,
+                OLED_FONT_SMALL, OLED_FONT_TRANSPARENT, OLED_FONT_PROPORTIONAL);
         }
         
         if (!SDWipeSector(sector, wipeData))
@@ -1288,9 +1289,10 @@ bool OLED::SDWipeSectors(uint32_t sectorAddress, uint32_t numSectors,
     
     if (displayProgress && success)
     {
-        drawRectangleWH(0, height-9, width, 9, COLOR_DARKSLATEGRAY);
+        drawRectangleWH(0, height-9, width, 9, OLED_PROGRESSBAR_COLOR_DEFAULT);
         drawTextGraphic(1, height-8, "s:"+(String)sectorsWiped+" (100%)", 1, 1,
-            COLOR_WHITE, OLED_FONT_SMALL, OLED_FONT_TRANSPARENT, OLED_FONT_PROPORTIONAL);
+            OLED_FONT_COLOR_DEFAULT,
+            OLED_FONT_SMALL, OLED_FONT_TRANSPARENT, OLED_FONT_PROPORTIONAL);
     }
 
     return success;
@@ -1303,7 +1305,8 @@ uint32_t OLED::SDWipeCard(uint8_t wipeData)
     uint32_t sector = 1;
     while (SDWipeSector(sector))
     {
-        drawTextGraphic(0,getDeviceHeight()-8,(String)""+sector+" ", 1, 1, COLOR_WHITE,
+        drawTextGraphic(0,getDeviceHeight()-8,(String)""+sector+" ", 1, 1,
+            OLED_FONT_COLOR_DEFAULT,
             OLED_FONT_SMALL, OLED_FONT_OPAQUE, OLED_FONT_PROPORTIONAL);
         sector++;
     }

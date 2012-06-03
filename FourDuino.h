@@ -119,12 +119,13 @@
 #define OLED_FONT_TRANSPARENT		0x00
 #define OLED_FONT_OPAQUE			0x01
 #define OLED_FONT_OPACITY_NOT_SET	0xFF
-#define OLED_FONT_COLOR_DEFAULT		COLOR_WHITE
 #define OLED_FONT_PROPORTIONAL		0x10
 #define OLED_FONT_NONPROPORTIONAL	0x00
 #define OLED_FONT_PROPORTIONAL_NOT_SET	0xFF
-#define OLED_BUTTON_COLOR_DEFAULT       COLOR_SLATEGRAY
-#define OLED_BUTTON_FONT_COLOR_DEFAULT  COLOR_SILVER
+#define OLED_FONT_COLOR_DEFAULT		Color(255,255,255) // COLOR_WHITE
+#define OLED_BUTTON_FONT_COLOR_DEFAULT  Color::from32BitRGB(0xC0C0C0) // COLOR_SILVER
+#define OLED_BUTTON_COLOR_DEFAULT       Color::from32BitRGB(0x708090) // COLOR_SLATEGRAY
+#define OLED_PROGRESSBAR_COLOR_DEFAULT  Color::from32BitRGB(0x2f4f4f) // COLOR_DARKSLATEGRAY
 
 //
 // SD Card commands
@@ -324,8 +325,6 @@ public:
 private:
     String _convertDeviceType(uint8_t deviceTypeResponse);
     uint16_t _convertResolution(uint8_t resolutionResponse);
-
-    uint8_t *heapptr, *stackptr;
 
     uint8_t _pinReset;
     uint16_t _initDelay;

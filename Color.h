@@ -2,7 +2,7 @@
 #define Color_h
 
 #include <inttypes.h>
-#include "Colors.h"
+//#include "Colors.h"
 
 struct Color
 {
@@ -40,8 +40,6 @@ public:
 
 private:
     void _init(uint8_t red, uint8_t green, uint8_t blue);
-
-    bool _readonly;
 
     uint8_t _red;
     uint8_t _green;
