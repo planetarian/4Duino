@@ -228,7 +228,6 @@ public:
         uint16_t color);
     bool drawTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3,
         Color color);
-    bool drawPolygonV(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, va_list ap);
     bool drawPolygon(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, ...);
     bool drawPolygon(Color color, uint8_t numVertices, uint8_t x1, uint8_t y1, ...);
     bool drawPolygon(uint16_t color, uint8_t numVertices, uint8_t vertices[][2]);
@@ -336,6 +335,8 @@ private:
     uint16_t _convertResolution(uint8_t resolutionResponse);
 
     static bool _checkDrawTextParameters(uint8_t fontSize, uint8_t opacity, uint8_t proportional);
+
+    bool _drawPolygonVa(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, va_list ap);
 
     uint8_t _pinReset;
     uint16_t _initDelay;

@@ -1,0 +1,102 @@
+#######################################
+# Syntax Coloring Map For FourDuino
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+OLED	KEYWORD1
+Color	KEYWORD1
+SerialContainer	KEYWORD1
+HardwareSerialContainer	KEYWORD1
+SoftwareSerialContainer	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+init	KEYWORD1
+reset	KEYWORD1
+write	KEYWORD1
+writeShort	KEYWORD1
+writeLong	KEYWORD1
+writeText	KEYWORD1
+writeString	KEYWORD1
+getResponse	KEYWORD1
+getResponseShort	KEYWORD1
+getAck	KEYWORD1
+getDeviceInfo	KEYWORD1
+getDeviceType	KEYWORD1
+getDeviceWidth	KEYWORD1
+getDeviceHeight	KEYWORD1
+getHardwareRevision	KEYWORD1
+getFirmwareRevision	KEYWORD1
+clear	KEYWORD1
+setPower	KEYWORD1
+on	KEYWORD1
+off	KEYWORD1
+setContrast	KEYWORD1
+lowPowerShutdown	KEYWORD1
+lowPowerStartup	KEYWORD1
+turnOffSD	KEYWORD1
+wakeOnJoystick	KEYWORD1
+wakeOnSerial	KEYWORD1
+#joystick	KEYWORD1
+#joystickWait	KEYWORD1
+#sound	KEYWORD1
+#tune	KEYWORD1
+readPixel	KEYWORD1
+drawPixel	KEYWORD1
+drawLine	KEYWORD1
+drawRectangle	KEYWORD1
+drawRectangleWH	KEYWORD1
+drawProgressBar	KEYWORD1
+drawTriangle	KEYWORD1
+drawPolygon	KEYWORD1
+drawCircle	KEYWORD1
+addUserBitmap	KEYWORD1
+drawUserBitmap	KEYWORD1
+setFill	KEYWORD1
+screenCopyPaste	KEYWORD1
+setBackground	KEYWORD1
+replaceBackground	KEYWORD1
+#drawImage8Bit	KEYWORD1
+#drawImage16Bit	KEYWORD1
+setFont	KEYWORD1
+setFontOpacity	KEYWORD1
+setButtonOpacity	KEYWORD1
+setFontProportional	KEYWORD1
+setFontColor	KEYWORD1
+setButtonColor	KEYWORD1
+drawText	KEYWORD1
+drawTextGraphic	KEYWORD1
+drawTextButton	KEYWORD1
+SDInitialize	KEYWORD1
+SDSetAddressPointer	KEYWORD1
+SDRead	KEYWORD1
+SDReadShort	KEYWORD1
+SDReadLong	KEYWORD1
+SDReadString	KEYWORD1
+SDWrite	KEYWORD1
+SDWriteShort	KEYWORD1
+SDWriteLong	KEYWORD1
+SDWriteText	KEYWORD1
+SDWriteString	KEYWORD1
+SDReadSector	KEYWORD1
+SDWriteSector	KEYWORD1
+SDWipeSector	KEYWORD1
+SDWipeSectors	KEYWORD1
+#SDWipeCard	KEYWORD1
+SDWriteScreen	KEYWORD1
+SDDrawScreen	KEYWORD1
+SDDrawImage	KEYWORD1
+SDRunCommand	KEYWORD1
+SDRunScript	KEYWORD1
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+

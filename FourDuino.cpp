@@ -592,7 +592,7 @@ bool OLED::drawTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t 
 }
 
 
-bool OLED::drawPolygonV(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, va_list ap)
+bool OLED::_drawPolygonVa(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, va_list ap)
 {
     // Vertex count limited by the serial interface
     if (numVertices > OLED_MAX_POLYGON_VERTICES)
@@ -615,7 +615,7 @@ bool OLED::drawPolygon(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t 
 {
     va_list ap;
     va_start(ap, y1);
-    bool result = drawPolygonV(color, numVertices, x1, y1, ap);
+    bool result = _drawPolygonVa(color, numVertices, x1, y1, ap);
     va_end(ap);
     return result;
 }
@@ -624,7 +624,7 @@ bool OLED::drawPolygon(Color color, uint8_t numVertices, uint8_t x1, uint8_t y1,
 {
     va_list ap;
     va_start(ap, y1);
-    bool result = drawPolygonV(color.to16BitRGB(), numVertices, x1, y1, ap);
+    bool result = _drawPolygonVa(color.to16BitRGB(), numVertices, x1, y1, ap);
     va_end(ap);
     return result;
 }
