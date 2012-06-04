@@ -1,5 +1,6 @@
 /*
   Mystify
+  by Ash Wolford (planetarian)
   Kickin' it oldschool.
   
   This sketch demonstrates the DrawPolygon method, Windows 95-style.
@@ -16,20 +17,20 @@
   
   Still, pretty nice demo of how smooth animation can be.
   
-  Note: You must include SoftwareSerial.h even if you're using hardware Serial*.
-  These examples use SoftwareSerial, as Serial1 is unavailable on Uno,
-  and Serial is unavailable (for hardware use) on Leonardo.
-  You can use any serial interface you have available, though.
-  Just switch out the TX/RX pins.
-  
   Circuit:
   * Any Arduino should work. Tested on Uno, Mega2560, and Pro Micro (Leonardo).
   * OLED Reset on pin 8
   * RX from OLED on pin 10
   * TX to OLED on pin 9
   * OLED 5V/GND to arduino 5V/GND
-  Normally it would be 8-9-10, but between the three models I tested,
-  pin 10 was the only common RXable pin.
+  Normally it would be 8-9-10 for the OLED, but between the three Arduino
+  models I tested, pin 10 was the only common RXable pin.
+  
+  Note: You must include SoftwareSerial.h even if you're using hardware Serial*.
+  These examples use SoftwareSerial, as Serial1 is unavailable on Uno,
+  and Serial is unavailable (for hardware use) on Leonardo.
+  You can use any serial interface you have available, though.
+  Just switch out the TX/RX pins.
 
   
   This example code is in the public domain.
