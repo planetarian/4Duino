@@ -74,35 +74,40 @@ void setup()
 
 void loop()
 {
-    // Clear columns for new oscilloscope data
-    oled.drawLine(x, 0, x, height-1, Color(0,30,0));
-    oled.drawLine(x+1, 0, x+1, height-1, Color(20,60,20)); // lighter color for the 'write head'
-
     // Set contrast based on photoresistor value
     // Normal room light level produces about 4V
     // Alternatively: oled.setContrast(OLEDUtil::scaleAnalog(analogRead(A3),15));
     oled.setContrastFromAnalog(A3);
     
+
+
+    // Clear columns for new oscilloscope data
+    oled.drawLine(x, 0, x, height-1, Color(0,30,0));
+    oled.drawLine(x+1, 0, x+1, height-1, Color(20,60,20)); // lighter color for the 'write head'
+
     // +5V -> Photoresistor -> A3 -> 10kOhm -> GND
     uint16_t newVal = analogRead(A3);
-    // Convert the analog reading (0-1023) to the Contrast scale (0-15)
-    uint16_t contrast = OLEDUtil::scaleAnalog(newVal, 15);
     // Draw a line from the previous reading to the current one
     oled.drawLine(
         x, height - 1 - OLEDUtil::scaleAnalog(lastVal, height),
         x+1, height - 1 - OLEDUtil::scaleAnalog(newVal,height),
         COLOR_LIME);
+    
 
+
+    // Convert the analog reading (0-1023) to the Contrast scale (0-15)
+    uint16_t contrast = OLEDUtil::scaleAnalog(newVal, 15);
     // Report the new contrast value
     oled.drawText(0, 6, (String)"C:" + contrast + " ");
 
+    // Report the actual voltage level of the analog input.
     // dtostrf() takes a float value and converts it to a string.
-    // str must be initialized prior to calling the function to prevent
-    // weird memory stuff.
+    // str must be initialized prior to calling the function to prevent weird memory stuff.
     // dtostrf(float Value, total string width (without null byte), precision, decimal places)
     char str[5] = "0.00";
     oled.drawText(0, 7, (String)"A3:" + dtostrf(OLEDUtil::analogToVoltage(newVal), 4, 2, str) + "v");
     
+
 
     // Save the value for the next loop
     lastVal = newVal;
@@ -111,6 +116,8 @@ void loop()
     x+=1;
     if (x >= oled.getDeviceWidth())
         x = 0;
+
+
 
     // The screen takes long enough to draw updates that a delay isn't really even necessary.
     //delay(1000/60);
