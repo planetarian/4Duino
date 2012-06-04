@@ -330,9 +330,16 @@ bool OLED::off()
 
 bool OLED::setContrast(uint8_t value)
 {
-    // Accepts 0-255 but will simply convert it to 0-16
-    write(3, OLED_CMD_CTLFUNC, OLED_PRM_CTLFUNC_CONTRAST, value >> 4);
+    if (value > OLED_CONTRAST_MAX)
+        return false;
+    write(3, OLED_CMD_CTLFUNC, OLED_PRM_CTLFUNC_CONTRAST, value);
     return getAck();
+}
+
+bool OLED::setContrastFromAnalog(uint8_t analogPin)
+{
+    uint16_t analogValue = analogRead(analogPin);
+    return setContrast(OLEDUtil::scaleAnalog(analogValue, OLED_CONTRAST_MAX));
 }
 
 bool OLED::lowPowerShutdown()

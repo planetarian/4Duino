@@ -37,6 +37,7 @@ setPower	KEYWORD1
 on	KEYWORD1
 off	KEYWORD1
 setContrast	KEYWORD1
+setContrastFromAnalog	KEYWORD1
 lowPowerShutdown	KEYWORD1
 lowPowerStartup	KEYWORD1
 turnOffSD	KEYWORD1

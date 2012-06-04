@@ -71,6 +71,7 @@
 #define OLED_RES_176				0x76
 #define OLED_RES_220				0x22
 #define OLED_RES_320				0x32
+#define OLED_CONTRAST_MAX           15
 
 //
 // Graphics commands
@@ -198,6 +199,7 @@ public:
     bool on();
     bool off();
     bool setContrast(uint8_t value);
+    bool setContrastFromAnalog(uint8_t analogPin);
     bool lowPowerShutdown();
     bool lowPowerPowerUp();
     bool turnOffSD();
