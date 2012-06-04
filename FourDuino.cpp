@@ -336,10 +336,13 @@ bool OLED::setContrast(uint8_t value)
     return getAck();
 }
 
-bool OLED::setContrastFromAnalog(uint8_t analogPin)
+bool OLED::setContrastFromAnalog(uint8_t analogPin, uint8_t minimumContrast)
 {
     uint16_t analogValue = analogRead(analogPin);
-    return setContrast(OLEDUtil::scaleAnalog(analogValue, OLED_CONTRAST_MAX));
+    if (minimumContrast >= OLED_CONTRAST_MAX || analogValue >= 1024)
+        return false;
+    uint8_t scaled = OLEDUtil::scaleAnalog(analogValue, OLED_CONTRAST_MAX-minimumContrast);
+    return setContrast(scaled+minimumContrast);
 }
 
 bool OLED::lowPowerShutdown()

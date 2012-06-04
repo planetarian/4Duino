@@ -199,7 +199,7 @@ public:
     bool on();
     bool off();
     bool setContrast(uint8_t value);
-    bool setContrastFromAnalog(uint8_t analogPin);
+    bool setContrastFromAnalog(uint8_t analogPin, uint8_t minimumContrast = 0);
     bool lowPowerShutdown();
     bool lowPowerPowerUp();
     bool turnOffSD();
