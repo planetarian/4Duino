@@ -68,6 +68,35 @@ float OLEDUtil::analogToVoltage(uint16_t value, float refVoltage)
     return (refVoltage / 1024.0) * value;
 }
 
+String OLEDUtil::analogToVoltageString(uint16_t value, float refVoltage)
+{
+    return floatToString(analogToVoltage(value, refVoltage), 4);
+}
+
+String OLEDUtil::floatToString(float value, uint8_t decimalPlaces)
+{
+    int32_t valueInt = (int32_t) value;
+    uint8_t count = decimalPlaces + 1; // Count the decimal
+    bool negative = value < 0;
+    if (negative)
+    {
+        valueInt = 0 - valueInt;
+        count++; // Count the sign
+    }
+    do
+    {
+        count++;
+        valueInt /= 10;
+    }
+    while (valueInt > 0);
+
+    if (count > MAX_FLOAT_STRING_LENGTH - 1)
+        return "Float value too large.";
+
+    char str[MAX_FLOAT_STRING_LENGTH] = "";
+    return dtostrf(value, count, decimalPlaces, str);
+}
+
 // Scales an analog reading to a value based on another scale.
 uint16_t OLEDUtil::scaleAnalog(uint16_t value, uint16_t max)
 {
