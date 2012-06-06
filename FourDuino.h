@@ -319,7 +319,8 @@ public:
     bool SDWipeSector(uint32_t sectorAddress, uint8_t wipeData = 0x00);
     bool SDWipeSectors(uint32_t sectorAddress, uint32_t numSectors,
         uint32_t &sectorsWiped, bool displayProgress = false, uint8_t wipeData = 0x00);
-    uint32_t SDWipeCard(uint8_t wipeData);
+    // Would take a matter of years to wipe a 32GB card, so this is pretty pointless =x
+    // uint32_t SDWipeCard(uint8_t wipeData);
     
     bool SDWriteScreen(uint32_t sectorAddress);
     bool SDWriteScreen(uint32_t sectorAddress,
