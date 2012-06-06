@@ -62,12 +62,13 @@ uint8_t x = 0;
 // Store previous analog value for drawing graph lines
 uint16_t lastVal = 0;
 
+// OLED(pinReset, serialInterface);
 OLED oled(8,SoftwareSerial(10,9));
 
 void setup()
 {
     oled.init();
-    oled.setFontOpacity(true);
+    oled.setFontOpacity(true); // Blank the area behind text
     height = oled.getDeviceHeight();
 }
 
@@ -82,6 +83,8 @@ void loop()
 
 
     // Clear columns for new oscilloscope data
+    // drawLine(x1, y1, x2, y2, color)
+    // draw functions can accept colors as 16-bit color values or Color objects
     oled.drawLine(x, 0, x, height-1, Color(0,30,0));
     oled.drawLine(x+1, 0, x+1, height-1, Color(20,60,20)); // lighter color for the 'write head'
 
@@ -98,6 +101,7 @@ void loop()
     // Convert the analog reading (0-1023) to the Contrast scale (0-15)
     uint16_t contrast = OLEDUtil::scaleAnalog(newVal, 15);
     // Report the new contrast value
+    // drawText(column, row, text)
     oled.drawText(0, 6, (String)"C:" + contrast + " ");
 
     // Report the actual voltage level of the analog input.
