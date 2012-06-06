@@ -36,7 +36,7 @@
   This example code is in the public domain.
 */
 
-#include "SoftwareSerial.h"
+#include "SoftwareSerial.h" // Must be included
 #include "FourDuino.h"
 #include "OLEDUtil.h"
 
@@ -46,6 +46,7 @@
 
 // Should work on any device
 // You can use Serial* but you still have to #include "SoftwareSerial.h"
+// OLED(resetPin, serialInterface)
 OLED oled = OLED(8, SoftwareSerial(10,9));
 
 // Shape colors
@@ -65,6 +66,9 @@ void setup()
         // Randomize the starting color of each shape
         // This is an OLED "screensaver", so let's use darker colors
         // by limiting SHAPECOLOR_MAX to a lowish value
+        // Color::rand()
+        // Color::rand(max)
+        // Color::rand(min, max)
         color[s] = Color::rand(SHAPECOLOR_MAX).to16BitRGB();
 
         for (uint8_t p = 0; p < NUM_POINTS; p++)
@@ -112,10 +116,13 @@ void loop()
         }
 
         // Shift colors for each shape over time
+        // Color::blend(color1, color2, color1Amount)
         color[s] = Color::blend(Color::from16BitRGB(color[s]),
             Color::rand(SHAPECOLOR_MAX), 230).to16BitRGB();
         
         // Draw the polygons
+        // drawPolygon(color, numPoints, pointsArray)
+        // drawPolygon(color, numPoints, point1x, point1y, point2x, point2y, ... pointNx, pointNy)
         oled.drawPolygon(color[s], NUM_POINTS, pos[s]);
     }
 
