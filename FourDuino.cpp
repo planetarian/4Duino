@@ -262,19 +262,13 @@ bool OLED::getDeviceInfo(bool displayOnScreen)
 
     uint8_t response[5];
 
-    // NOTE: revision values may not be what you expect them to be;
-    // I haven't got much to go by.
-    // They seem to take the hex value as an integer:
-    // 10 hex == 10 decimal.
-    // TODO: Automatically convert to int.
-
-
     uint8_t hw, fw;
     if (!getResponse(response[0]) ||
         !getResponse(response[1]) || 
         !getResponse(response[2]) ||	
         !getResponse(response[3]) ||
         !getResponse(response[4]) ||
+        // Revision values are in hex but represent integers (0x10 == 10)
         !OLEDUtil::readHexAsDec(response[1], hw) ||
         !OLEDUtil::readHexAsDec(response[2], fw))
         return false;
