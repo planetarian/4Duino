@@ -1293,6 +1293,7 @@ bool OLED::SDWipeSectors(uint32_t sectorAddress, uint32_t numSectors,
     return success;
 }
 
+/* // This simply takes too long to complete, so there's no point in it being here.
 uint32_t OLED::SDWipeCard(uint8_t wipeData)
 {
     SDWriteScreen(0x00);
@@ -1311,6 +1312,7 @@ uint32_t OLED::SDWipeCard(uint8_t wipeData)
 
     return sector;
 }
+*/
 
 bool OLED::SDWriteScreen(uint32_t sectorAddress)
 {
