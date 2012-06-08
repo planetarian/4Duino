@@ -98,15 +98,15 @@ String OLEDUtil::floatToString(float value, uint8_t decimalPlaces)
 }
 
 // Scales an analog reading to a value based on another scale.
-uint16_t OLEDUtil::scaleAnalog(uint16_t value, uint16_t max)
+uint32_t OLEDUtil::scaleAnalog(uint32_t value, uint32_t max)
 {
     return convertValueScale(value, 1024, max);
 }
 
 // Converts the scale of a value to another scale.
-uint16_t OLEDUtil::convertValueScale(uint16_t value, uint16_t valueScale, uint16_t targetScale)
+uint32_t OLEDUtil::convertValueScale(uint32_t value, uint32_t valueScale, uint32_t targetScale)
 {
-    return targetScale * 1000 / valueScale * value / 1000;
+    return 1000 * targetScale / valueScale * value / 1000;
 }
 
 uint16_t OLEDUtil::checkMemory() {

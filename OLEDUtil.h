@@ -18,8 +18,8 @@ public:
     static float analogToVoltage(uint16_t value, float refVoltage = 5.0);
     static String analogToVoltageString(uint16_t value, float refVoltage = 5.0);
     static String floatToString(float value, uint8_t decimalPlaces = 2);
-    static uint16_t scaleAnalog(uint16_t value, uint16_t max);
-    static uint16_t convertValueScale(uint16_t value, uint16_t valueScale, uint16_t targetScale);
+    static uint32_t scaleAnalog(uint32_t value, uint32_t max);
+    static uint32_t convertValueScale(uint32_t value, uint32_t valueScale, uint32_t targetScale);
     static uint16_t checkMemory();
 
 private:
