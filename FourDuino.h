@@ -13,7 +13,7 @@
 //
 
 #define OLED_HARDWARE_SERIAL_DEFAULT    Serial // Mega can also use Serial1, Serial2, Serial3
-#define OLED_BAUD_DEFAULT			    28800 // 38400+ causes problems with ReadSector using SoftwareSerial
+#define OLED_BAUD_DEFAULT			    9600 // 38400+ causes problems with ReadSector using SoftwareSerial
 #define OLED_INIT_RETRIES               10 // How many times to try initializing before failing
 #define OLED_INIT_DELAY_MS			    1000 // How long to wait for the display to power up
 #define OLED_RESET_DELAY_MS			    20 // How long to hold reset pin low
