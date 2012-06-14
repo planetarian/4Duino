@@ -12,15 +12,29 @@
 // Settings
 //
 
-#define OLED_HARDWARE_SERIAL_DEFAULT    Serial // Mega can also use Serial1, Serial2, Serial3
-#define OLED_BAUD_DEFAULT               9600 // 38400+ causes problems with ReadSector using SoftwareSerial
-#define OLED_INIT_RETRIES               10 // How many times to try initializing before failing
-#define OLED_INIT_DELAY_MS              1000 // How long to wait for the display to power up
-#define OLED_RESET_DELAY_MS             20 // How long to hold reset pin low
-#define OLED_RESPONSE_RETRY_DELAY_US    17 // 17.3: Approximate amount of time for one bit at 57600
-#define OLED_RESPONSE_RETRIES           30000 // 60000: About one second at 17 microseconds per retry
-#define OLED_SD_SECTOR_READ_DELAY_MS    0 // Slow SD cards might want to increase this to prevent underflow
-#define OLED_SD_WIPE_MAX_SECTORS        0xFFFFFFFF // Dunno how big these things get, really.
+// TODO: add methods to set some of these from within sketches?
+#define OLED_HARDWARE_SERIAL_DEFAULT    Serial  // Mega can also use Serial1, Serial2, Serial3
+#define OLED_BAUD_DEFAULT               9600    // 38400+ causes problems with ReadSector using SoftwareSerial
+#define OLED_INIT_RETRIES               10      // How many times to try initializing before failing
+#define OLED_INIT_DELAY_MS              1000    // How long to wait for the display to power up
+#define OLED_RESET_DELAY_MS             20      // How long to hold reset pin low
+#define OLED_RESPONSE_RETRY_DELAY_US    17      // 17.3: Approximate amount of time for one bit at 57600
+#define OLED_RESPONSE_RETRIES           30000   // 60000: About one second at 17 microseconds per retry
+#define OLED_SD_SECTOR_READ_DELAY_MS    0       // Slow SD cards might want to increase this to prevent underflow
+// Removed as part of the SD-wipe removal.
+// #define OLED_SD_WIPE_MAX_SECTORS        0xFFFFFFFF  // Dunno how big these things get, really.
+
+// It would be better to set your defaults in your sketches rather than altering these
+#define OLED_FONT_SIZE_DEFAULT          OLED_FONT_SMALL
+#define OLED_FONT_OPACITY_DEFAULT       false
+#define OLED_FONT_PROPORTIONAL_DEFAULT  false
+#define OLED_BUTTON_OPACITY_DEFAULT     false
+
+#define OLED_FONT_COLOR_DEFAULT             Color::from32BitRGB(0xFFFFFF) // COLOR_WHITE
+#define OLED_BUTTON_FONT_COLOR_DEFAULT      Color::from32BitRGB(0xC0C0C0) // COLOR_SILVER
+#define OLED_BUTTON_COLOR_DEFAULT           Color::from32BitRGB(0x708090) // COLOR_SLATEGRAY
+#define OLED_PROGRESSBAR_COLOR_FORE_DEFAULT Color::from32BitRGB(0x2f4f4f) // COLOR_DARKSLATEGRAY
+#define OLED_PROGRESSBAR_COLOR_BACK_DEFAULT Color::from32BitRGB(0x182828) // Sort of a darker darkslategray
 
 //
 // General constants
@@ -28,7 +42,7 @@
 
 #define OLED_ACK                    0x06
 #define OLED_NAK                    0x15
-#define OLED_NORESPONSE             0x00
+#define OLED_NORESPONSE             0x00 // Only used in certain instances; nul is sometimes a valid response
 
 #define OLED_PRM_NA                 0x00
 #define OLED_PRM_BOOL_FALSE         0x00
@@ -70,7 +84,7 @@
 #define OLED_RES_160                0x60
 #define OLED_RES_176                0x76
 #define OLED_RES_220                0x22
-#define OLED_RES_320                0x32
+#define OLED_RES_320                0x32 // Not currently supported
 #define OLED_CONTRAST_MAX           15
 
 //
@@ -90,15 +104,15 @@
 #define OLED_CMD_SET_BACKGROUND     0x4B
 #define OLED_CMD_REPLACE_BACKGROUND 0x42
 #define OLED_CMD_REPLACE_COLOR      0x6B
-#define OLED_CMD_SET_PEN_SIZE       0x70
+#define OLED_CMD_SET_SHAPE_FILL     0x70
 #define OLED_CMD_SCREEN_COPY_PASTE  0x63
 
-#define OLED_PRM_DRAW_IMAGE_8BIT    0x08
-#define OLED_PRM_DRAW_IMAGE_16BIT   0x10
-#define OLED_PRM_SET_PEN_SIZE_FILL  0x00
-#define OLED_PRM_SET_PEN_SIZE_EMPTY 0x01
-#define OLED_MAX_USER_BITMAPS       32
-#define OLED_MAX_POLYGON_VERTICES   7
+#define OLED_PRM_DRAW_IMAGE_8BIT        0x08
+#define OLED_PRM_DRAW_IMAGE_16BIT       0x10
+#define OLED_PRM_SET_SHAPE_FILL_SOLID   0x00
+#define OLED_PRM_SET_SHAPE_FILL_EMPTY   0x01
+#define OLED_MAX_USER_BITMAPS           32
+#define OLED_MAX_POLYGON_VERTICES       7 // Serial API specifies 7 as the max
 
 //
 // Text commands
@@ -110,7 +124,7 @@
 #define OLED_CMD_DRAW_STRING_GFX    0x53
 #define OLED_CMD_DRAW_STRING_BUTTON 0x62
 #define OLED_CMD_DRAW_CHAR_TEXT     0x54 // I don't really see the point.
-#define OLED_CMD_DRAW_CHAR_GFX      0x74 // Not bothering.
+#define OLED_CMD_DRAW_CHAR_GFX      0x74 // Not bothering. Use string methods.
 
 #define OLED_PRM_BUTTON_DOWN        0x00
 #define OLED_PRM_BUTTON_UP          0x01
@@ -125,17 +139,6 @@
 #define OLED_FONT_PROPORTIONAL      0x10
 #define OLED_FONT_NONPROPORTIONAL   0x00
 #define OLED_FONT_PROPORTIONAL_NOT_SET  0xFF
-
-#define OLED_FONT_COLOR_DEFAULT         Color(255,255,255) // COLOR_WHITE
-#define OLED_BUTTON_FONT_COLOR_DEFAULT  Color::from32BitRGB(0xC0C0C0) // COLOR_SILVER
-#define OLED_BUTTON_COLOR_DEFAULT       Color::from32BitRGB(0x708090) // COLOR_SLATEGRAY
-#define OLED_PROGRESSBAR_COLOR_FORE_DEFAULT Color::from32BitRGB(0x2f4f4f) // COLOR_DARKSLATEGRAY
-#define OLED_PROGRESSBAR_COLOR_BACK_DEFAULT Color::from32BitRGB(0x182828)
-
-#define OLED_FONT_SIZE_DEFAULT          OLED_FONT_SMALL
-#define OLED_FONT_OPACITY_DEFAULT       false
-#define OLED_FONT_PROPORTIONAL_DEFAULT  false
-#define OLED_BUTTON_OPACITY_DEFAULT     false
 
 //
 // SD Card commands
@@ -154,11 +157,11 @@
 #define OLED_CMD_SD_DISPLAY_VIDEO       0x56
 #define OLED_CMD_SD_RUN_4DSL_SCRIPT     0x50
 
-#define OLED_SD_SECTOR_SIZE             512
+#define OLED_SD_SECTOR_SIZE                 512
 #define OLED_SD_READ_STRING_BUFFER_LENGTH   32
 // Decrease this to apply an artificial limit on string length.
 // Arduino only has 2KB SRAM anyway, so reducing this may be outright necessary...
-#define OLED_SD_READ_STRING_MAX_LENGTH  2048
+#define OLED_SD_READ_STRING_MAX_LENGTH      2048
 
 
 
