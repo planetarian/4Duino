@@ -21,20 +21,6 @@ bool OLEDUtil::readHexAsDec(uint8_t value, uint8_t& result)
     return true;
 }
 
-// Blinks an LED. derp.
-void OLEDUtil::blinkLED(uint8_t pin, uint8_t numTimes, uint16_t blinkDelayMs)
-{
-    digitalWrite(pin, LOW);
-    for (uint8_t i = 0; i < numTimes; i++)
-    {
-        delay(blinkDelayMs);
-        digitalWrite(pin, HIGH);
-        delay(blinkDelayMs);
-        digitalWrite(pin, LOW);
-    }
-    delay(blinkDelayMs*2);
-}
-
 // Converts e.g. (uint8_t)0xFF to (String)"0xFF"
 String OLEDUtil::byteToString(uint8_t data)
 {
@@ -107,13 +93,4 @@ uint32_t OLEDUtil::scaleAnalog(uint32_t value, uint32_t max)
 uint32_t OLEDUtil::convertValueScale(uint32_t value, uint32_t valueScale, uint32_t targetScale)
 {
     return 1000 * targetScale / valueScale * value / 1000;
-}
-
-uint16_t OLEDUtil::checkMemory() {
-    uint8_t *heapptr, *stackptr;
-    stackptr = (uint8_t *)malloc(4);          // use stackptr temporarily
-    heapptr = stackptr;                     // save value of heap pointer
-    free(stackptr);      // free up the memory again (sets stackptr to 0)
-    stackptr =  (uint8_t *)(SP);           // save value of stack pointer
-    return stackptr - heapptr;
 }
