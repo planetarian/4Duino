@@ -49,7 +49,7 @@ bool OLED::init()
 
         _serial->begin(_baudRate);
         // Let the OLED auto-detect baud rate
-        write(OLED_CMD_BAUD_AUTO);	
+        write(OLED_CMD_BAUD_AUTO);
         _run = getAck();
     }
     if (!_run)
@@ -265,7 +265,7 @@ bool OLED::getDeviceInfo(bool displayOnScreen)
     uint8_t hw, fw;
     if (!getResponse(response[0]) ||
         !getResponse(response[1]) || 
-        !getResponse(response[2]) ||	
+        !getResponse(response[2]) ||
         !getResponse(response[3]) ||
         !getResponse(response[4]) ||
         // Revision values are in hex but represent integers (0x10 == 10)
@@ -869,7 +869,7 @@ bool OLED::drawText(uint8_t col, uint8_t row, String text)
 
 
 bool OLED::drawTextGraphic(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height,
-    uint16_t color,	uint8_t fontSize, uint8_t opacity, uint8_t proportional)
+    uint16_t color, uint8_t fontSize, uint8_t opacity, uint8_t proportional)
 {
     if (!_checkDrawTextParameters(fontSize, opacity, proportional) ||
         width < 1 || height < 1)

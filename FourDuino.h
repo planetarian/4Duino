@@ -13,10 +13,10 @@
 //
 
 #define OLED_HARDWARE_SERIAL_DEFAULT    Serial // Mega can also use Serial1, Serial2, Serial3
-#define OLED_BAUD_DEFAULT			    9600 // 38400+ causes problems with ReadSector using SoftwareSerial
+#define OLED_BAUD_DEFAULT               9600 // 38400+ causes problems with ReadSector using SoftwareSerial
 #define OLED_INIT_RETRIES               10 // How many times to try initializing before failing
-#define OLED_INIT_DELAY_MS			    1000 // How long to wait for the display to power up
-#define OLED_RESET_DELAY_MS			    20 // How long to hold reset pin low
+#define OLED_INIT_DELAY_MS              1000 // How long to wait for the display to power up
+#define OLED_RESET_DELAY_MS             20 // How long to hold reset pin low
 #define OLED_RESPONSE_RETRY_DELAY_US    17 // 17.3: Approximate amount of time for one bit at 57600
 #define OLED_RESPONSE_RETRIES           30000 // 60000: About one second at 17 microseconds per retry
 #define OLED_SD_SECTOR_READ_DELAY_MS    0 // Slow SD cards might want to increase this to prevent underflow
@@ -26,77 +26,77 @@
 // General constants
 //
 
-#define OLED_ACK					0x06
-#define OLED_NAK					0x15
-#define OLED_NORESPONSE				0x00
+#define OLED_ACK                    0x06
+#define OLED_NAK                    0x15
+#define OLED_NORESPONSE             0x00
 
-#define OLED_PRM_NA					0x00
-#define OLED_PRM_BOOL_FALSE			0x00
-#define OLED_PRM_BOOL_TRUE			0x01
+#define OLED_PRM_NA                 0x00
+#define OLED_PRM_BOOL_FALSE         0x00
+#define OLED_PRM_BOOL_TRUE          0x01
 
 //
 // Base system commands
 //
 
-#define OLED_CMD_BAUD_AUTO			0x55
-#define OLED_CMD_INFO				0x56
-#define OLED_CMD_CLEAR_SCREEN		0x45
-#define OLED_CMD_CTLFUNC			0x59
-#define OLED_CMD_SLEEP				0x5A
-#define OLED_CMD_INPUT_STATUS		0x4A
-#define OLED_CMD_INPUT_STATUS_WAIT	0x6A
-#define	OLED_CMD_SOUND				0x4E
-#define OLED_CMD_TUNE				0x6E
+#define OLED_CMD_BAUD_AUTO          0x55
+#define OLED_CMD_INFO               0x56
+#define OLED_CMD_CLEAR_SCREEN       0x45
+#define OLED_CMD_CTLFUNC            0x59
+#define OLED_CMD_SLEEP              0x5A
+#define OLED_CMD_INPUT_STATUS       0x4A
+#define OLED_CMD_INPUT_STATUS_WAIT  0x6A
+#define OLED_CMD_SOUND              0x4E
+#define OLED_CMD_TUNE               0x6E
 
-#define OLED_PRM_CTLFUNC_NA			0x00
-#define OLED_PRM_CTLFUNC_POWER		0x01
-#define OLED_PRM_CTLFUNC_CONTRAST	0x02
-#define OLED_PRM_CTLFUNC_LOWPOWER	0x03
-#define OLED_PRM_CTLFUNC_POWER_OFF	0x00
-#define OLED_PRM_CTLFUNC_POWER_ON	0x01
-#define OLED_PRM_CTLFUNC_LOWPOWER_SHUTDOWN	0x00
-#define OLED_PRM_CTLFUNC_LOWPOWER_POWERUP	0x01
-#define OLED_PRM_SLEEP_SD_OFF		0x80
-#define OLED_PRM_SLEEP_WAKE_JOY		0x02
-#define OLED_PRM_SLEEP_WAKE_SERIAL	0x01
+#define OLED_PRM_CTLFUNC_NA         0x00
+#define OLED_PRM_CTLFUNC_POWER      0x01
+#define OLED_PRM_CTLFUNC_CONTRAST   0x02
+#define OLED_PRM_CTLFUNC_LOWPOWER   0x03
+#define OLED_PRM_CTLFUNC_POWER_OFF  0x00
+#define OLED_PRM_CTLFUNC_POWER_ON   0x01
+#define OLED_PRM_CTLFUNC_LOWPOWER_SHUTDOWN  0x00
+#define OLED_PRM_CTLFUNC_LOWPOWER_POWERUP   0x01
+#define OLED_PRM_SLEEP_SD_OFF       0x80
+#define OLED_PRM_SLEEP_WAKE_JOY     0x02
+#define OLED_PRM_SLEEP_WAKE_SERIAL  0x01
 
-#define OLED_DEVICETYPE_OLED		0x00
-#define OLED_DEVICETYPE_LCD			0x01
-#define OLED_DEVICETYPE_VGA			0x02
+#define OLED_DEVICETYPE_OLED        0x00
+#define OLED_DEVICETYPE_LCD         0x01
+#define OLED_DEVICETYPE_VGA         0x02
 
-#define OLED_RES_64					0x64
-#define OLED_RES_96					0x96
-#define OLED_RES_128				0x28
-#define OLED_RES_160				0x60
-#define OLED_RES_176				0x76
-#define OLED_RES_220				0x22
-#define OLED_RES_320				0x32
+#define OLED_RES_64                 0x64
+#define OLED_RES_96                 0x96
+#define OLED_RES_128                0x28
+#define OLED_RES_160                0x60
+#define OLED_RES_176                0x76
+#define OLED_RES_220                0x22
+#define OLED_RES_320                0x32
 #define OLED_CONTRAST_MAX           15
 
 //
 // Graphics commands
 //
 
-#define OLED_CMD_READ_PIXEL			0x52
-#define OLED_CMD_DRAW_PIXEL			0x50
-#define OLED_CMD_DRAW_LINE			0x4C
-#define OLED_CMD_DRAW_RECTANGLE		0x72
-#define OLED_CMD_DRAW_TRIANGLE		0x47
-#define OLED_CMD_DRAW_POLYGON		0x67
-#define OLED_CMD_DRAW_CIRCLE		0x43
-#define OLED_CMD_DRAW_IMAGE			0x49
-#define OLED_CMD_ADD_USER_BITMAP	0x41
-#define OLED_CMD_DRAW_USER_BITMAP	0x44
-#define OLED_CMD_SET_BACKGROUND		0x4B
-#define OLED_CMD_REPLACE_BACKGROUND	0x42
-#define OLED_CMD_REPLACE_COLOR		0x6B
-#define OLED_CMD_SET_PEN_SIZE		0x70
-#define OLED_CMD_SCREEN_COPY_PASTE	0x63
+#define OLED_CMD_READ_PIXEL         0x52
+#define OLED_CMD_DRAW_PIXEL         0x50
+#define OLED_CMD_DRAW_LINE          0x4C
+#define OLED_CMD_DRAW_RECTANGLE     0x72
+#define OLED_CMD_DRAW_TRIANGLE      0x47
+#define OLED_CMD_DRAW_POLYGON       0x67
+#define OLED_CMD_DRAW_CIRCLE        0x43
+#define OLED_CMD_DRAW_IMAGE         0x49
+#define OLED_CMD_ADD_USER_BITMAP    0x41
+#define OLED_CMD_DRAW_USER_BITMAP   0x44
+#define OLED_CMD_SET_BACKGROUND     0x4B
+#define OLED_CMD_REPLACE_BACKGROUND 0x42
+#define OLED_CMD_REPLACE_COLOR      0x6B
+#define OLED_CMD_SET_PEN_SIZE       0x70
+#define OLED_CMD_SCREEN_COPY_PASTE  0x63
 
-#define OLED_PRM_DRAW_IMAGE_8BIT	0x08
-#define OLED_PRM_DRAW_IMAGE_16BIT	0x10
-#define OLED_PRM_SET_PEN_SIZE_FILL	0x00
-#define OLED_PRM_SET_PEN_SIZE_EMPTY	0x01
+#define OLED_PRM_DRAW_IMAGE_8BIT    0x08
+#define OLED_PRM_DRAW_IMAGE_16BIT   0x10
+#define OLED_PRM_SET_PEN_SIZE_FILL  0x00
+#define OLED_PRM_SET_PEN_SIZE_EMPTY 0x01
 #define OLED_MAX_USER_BITMAPS       32
 #define OLED_MAX_POLYGON_VERTICES   7
 
@@ -104,29 +104,29 @@
 // Text commands
 //
 
-#define OLED_CMD_SET_FONT			0x46
-#define OLED_CMD_SET_FONT_OPACITY	0x4F
-#define OLED_CMD_DRAW_STRING_TEXT	0x73
-#define OLED_CMD_DRAW_STRING_GFX	0x53
-#define OLED_CMD_DRAW_STRING_BUTTON	0x62
-#define OLED_CMD_DRAW_CHAR_TEXT		0x54 // I don't really see the point.
-#define OLED_CMD_DRAW_CHAR_GFX		0x74 // Not bothering.
+#define OLED_CMD_SET_FONT           0x46
+#define OLED_CMD_SET_FONT_OPACITY   0x4F
+#define OLED_CMD_DRAW_STRING_TEXT   0x73
+#define OLED_CMD_DRAW_STRING_GFX    0x53
+#define OLED_CMD_DRAW_STRING_BUTTON 0x62
+#define OLED_CMD_DRAW_CHAR_TEXT     0x54 // I don't really see the point.
+#define OLED_CMD_DRAW_CHAR_GFX      0x74 // Not bothering.
 
 #define OLED_PRM_BUTTON_DOWN        0x00
 #define OLED_PRM_BUTTON_UP          0x01
 
-#define OLED_FONT_SMALL				0x00
-#define OLED_FONT_MEDIUM			0x01
-#define OLED_FONT_LARGE				0x02
-#define OLED_FONT_SIZE_NOT_SET		0xFF
-#define OLED_FONT_TRANSPARENT		0x00
-#define OLED_FONT_OPAQUE			0x01
-#define OLED_FONT_OPACITY_NOT_SET	0xFF
-#define OLED_FONT_PROPORTIONAL		0x10
-#define OLED_FONT_NONPROPORTIONAL	0x00
-#define OLED_FONT_PROPORTIONAL_NOT_SET	0xFF
+#define OLED_FONT_SMALL             0x00
+#define OLED_FONT_MEDIUM            0x01
+#define OLED_FONT_LARGE             0x02
+#define OLED_FONT_SIZE_NOT_SET      0xFF
+#define OLED_FONT_TRANSPARENT       0x00
+#define OLED_FONT_OPAQUE            0x01
+#define OLED_FONT_OPACITY_NOT_SET   0xFF
+#define OLED_FONT_PROPORTIONAL      0x10
+#define OLED_FONT_NONPROPORTIONAL   0x00
+#define OLED_FONT_PROPORTIONAL_NOT_SET  0xFF
 
-#define OLED_FONT_COLOR_DEFAULT		    Color(255,255,255) // COLOR_WHITE
+#define OLED_FONT_COLOR_DEFAULT         Color(255,255,255) // COLOR_WHITE
 #define OLED_BUTTON_FONT_COLOR_DEFAULT  Color::from32BitRGB(0xC0C0C0) // COLOR_SILVER
 #define OLED_BUTTON_COLOR_DEFAULT       Color::from32BitRGB(0x708090) // COLOR_SLATEGRAY
 #define OLED_PROGRESSBAR_COLOR_FORE_DEFAULT Color::from32BitRGB(0x2f4f4f) // COLOR_DARKSLATEGRAY
