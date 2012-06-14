@@ -719,7 +719,7 @@ bool OLED::drawUserBitmap(uint8_t charIndex, uint8_t x, uint8_t y, Color color)
 bool OLED::setFill(bool fillShapes)
 {
     write(2, OLED_CMD_SET_SHAPE_FILL,
-        fillShapes ? OLED_PRM_SET_SHAPE_FILL_SOLID : OLED_PRM_SET_SHAPE_FILL_EMPTY);
+        fillShapes ? OLED_PRM_SHAPE_FILL_SOLID : OLED_PRM_SHAPE_FILL_EMPTY);
     return getAck();
 }
 

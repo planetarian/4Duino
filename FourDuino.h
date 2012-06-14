@@ -109,8 +109,8 @@
 
 #define OLED_PRM_DRAW_IMAGE_8BIT        0x08
 #define OLED_PRM_DRAW_IMAGE_16BIT       0x10
-#define OLED_PRM_SET_SHAPE_FILL_SOLID   0x00
-#define OLED_PRM_SET_SHAPE_FILL_EMPTY   0x01
+#define OLED_PRM_SHAPE_FILL_SOLID   0x00
+#define OLED_PRM_SHAPE_FILL_EMPTY   0x01
 #define OLED_MAX_USER_BITMAPS           32
 #define OLED_MAX_POLYGON_VERTICES       7 // Serial API specifies 7 as the max
 
