@@ -64,7 +64,15 @@ uint8_t x = 0;
 uint16_t lastVal = 0;
 
 // OLED(pinReset, serialInterface);
-OLED oled(8,SoftwareSerial(10,9));
+
+int resetPin = 8;
+int toOledRxPin = 9;
+int toOledTxPin = 10;
+
+// Should work on any device
+// You can use Serial* but you still have to #include "SoftwareSerial.h"
+// OLED(resetPin, serialInterface)
+OLED oled = OLED(resetPin, SoftwareSerial(toOledTxPin,toOledRxPin));
 
 void setup()
 {
