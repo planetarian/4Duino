@@ -64,7 +64,7 @@ int8_t vector[NUM_SHAPES][NUM_POINTS][2];
 
 void setup()
 {
-    bool init = oled.init();
+    oled.init();
 
     for (uint8_t s = 0; s < NUM_SHAPES; s++)
     {
