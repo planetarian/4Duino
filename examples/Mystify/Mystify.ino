@@ -19,9 +19,9 @@
   
   Circuit:
   * Any Arduino should work. Tested on Uno, Mega2560, and Pro Micro (Leonardo).
-  * Pin 8 -> OLED Reset
-  * Pin 10 -> OLED TX
-  * Pin 9 -> 1kOhm resistor -> OLED RX
+  * D8 -> OLED Reset
+  * D10 -> OLED TX
+  * D9 -> 1kOhm resistor -> OLED RX
   * OLED 5V/GND to arduino 5V/GND
   Note that you can change this to use whatever pins you want for the serial connection,
   but only certain pins can be used as SoftwareSerial RX.
