@@ -24,14 +24,15 @@
   
   Circuit:
   * Any Arduino should work. Tested on Uno, Mega2560, and Pro Micro (Leonardo).
-  * OLED Reset on pin 8
-  * RX from OLED on pin 10
-  * TX to OLED on pin 9
+  * D8 -> OLED Reset
+  * D10 -> OLED TX
+  * D9 -> 1kOhm resistor -> OLED RX
   * OLED 5V/GND to arduino 5V/GND
-  * Photoresistor connected from 5V to A3
-  * 10kOhm resistor connected from A3 to GND
-  Normally it would be 8-9-10 for the OLED, but between the three Arduino
-  models I tested, pin 10 was the only common RXable pin.
+  * 5V -> Photoresistor -> A3 -> 10kOhm resistor -> GND
+  Note that you can change this to use whatever pins you want for the serial connection,
+  but only certain pins can be used as SoftwareSerial RX.
+  In the three models I tested, pin 10 was the only common RXable pin.
+
   
   Note: You must include SoftwareSerial.h even if you're using hardware Serial*.
   These examples use SoftwareSerial, as Serial1 is unavailable on Uno,
