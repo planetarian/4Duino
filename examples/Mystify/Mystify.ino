@@ -45,10 +45,14 @@
 #define NUM_POINTS 4 // Number of points per shape
 #define SHAPECOLOR_MAX 128 // Max RGB value for color randomization
 
+int resetPin = 8;
+int toOledRxPin = 9;
+int toOledTxPin = 10;
+
 // Should work on any device
 // You can use Serial* but you still have to #include "SoftwareSerial.h"
 // OLED(resetPin, serialInterface)
-OLED oled = OLED(8, SoftwareSerial(10,9));
+OLED oled = OLED(resetPin, SoftwareSerial(toOledTxPin,toOledRxPin));
 
 // Shape colors
 uint16_t color[NUM_SHAPES];
