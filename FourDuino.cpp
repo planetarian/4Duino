@@ -25,7 +25,7 @@ OLED::~OLED()
 
 bool OLED::init()
 {
-    _deviceType = "unknown";
+    _deviceType = Unknown;
     _hardwareRevision = 0;
     _firmwareRevision = 0;
     _deviceWidth = 0;
@@ -40,6 +40,7 @@ bool OLED::init()
 
     pinMode(_pinReset, OUTPUT);
 
+    // Initialize the display using auto-baud command at 9600 baud.
     bool _run = false;
     for (uint8_t r = 0; r < OLED_INIT_RETRIES && !_run; r++)
     {
@@ -47,22 +48,20 @@ bool OLED::init()
         // Wait for the OLED/SD to initialize
         delay(OLED_INIT_DELAY_MS);
 
-        _serial->begin(_baudRate);
+        _serial->begin(9600);
         // Let the OLED auto-detect baud rate
         write(OLED_CMD_BAUD_AUTO);
-        _run = getAck();
+        if (!getAck())
+            continue;
+        // Change to the desired baud
+        _run = setBaud(_baudRate);
     }
     if (!_run)
         return false;
 
     getDeviceInfo(false);
-    if (_deviceWidth > 0xFF || _deviceHeight > 0xFF)
-    {
-        // This device is not supported, x/y are out of bounds.
-        // Reset to ensure no further commands can be used.
-        reset();
-        return false;
-    }
+
+    setFill(OLED_SHAPE_FILL_DEFAULT);
     setFont(OLED_FONT_SIZE_DEFAULT);
     setFontOpacity(OLED_FONT_OPACITY_DEFAULT);
     setFontProportional(OLED_FONT_PROPORTIONAL_DEFAULT);
@@ -70,6 +69,83 @@ bool OLED::init()
     setButtonOpacity(OLED_BUTTON_OPACITY_DEFAULT);
     setButtonColor(OLED_BUTTON_COLOR_DEFAULT);
     setButtonFontColor(OLED_BUTTON_FONT_COLOR_DEFAULT);
+    return true;
+}
+
+bool OLED::setBaud(uint32_t baudRate)
+{
+    uint8_t baudByte = 0;
+    if (!_getBaudByte(baudRate, baudByte))
+        return false;
+    write(OLED_CMD_BAUD);
+    write(baudByte);
+    _serial->begin(_baudRate);
+
+    return getAck();
+}
+
+bool OLED::_getBaudByte(uint32_t baudRate, uint8_t &baudByte)
+{
+    baudByte = 0xFF;
+    switch (baudRate)
+    {
+    case 110:
+        baudByte = OLED_PRM_BAUD_110;
+        break;
+    case 300:
+        baudByte = OLED_PRM_BAUD_300;
+        break;
+    case 600:
+        baudByte = OLED_PRM_BAUD_600;
+        break;
+    case 1200:
+        baudByte = OLED_PRM_BAUD_1200;
+        break;
+    case 2400:
+        baudByte = OLED_PRM_BAUD_2400;
+        break;
+    case 4800:
+        baudByte = OLED_PRM_BAUD_4800;
+        break;
+    case 9600:
+        baudByte = OLED_PRM_BAUD_9600;
+        break;
+    case 14400:
+        baudByte = OLED_PRM_BAUD_14400;
+        break;
+    case 19200:
+        baudByte = OLED_PRM_BAUD_19200;
+        break;
+    case 31250:
+        baudByte = OLED_PRM_BAUD_31250;
+        break;
+    case 38400:
+        baudByte = OLED_PRM_BAUD_38400;
+        break;
+    case 56000:
+        baudByte = OLED_PRM_BAUD_56000;
+        break;
+    case 57600:
+        baudByte = OLED_PRM_BAUD_57600;
+        break;
+    case 115200:
+        baudByte = OLED_PRM_BAUD_115200;
+        break;
+    case 129032:
+        baudByte = OLED_PRM_BAUD_129032;
+        break;
+    case 282353:
+        baudByte = OLED_PRM_BAUD_282353;
+        break;
+    case 128000:
+        baudByte = OLED_PRM_BAUD_128000;
+        break;
+    case 256000:
+        baudByte = OLED_PRM_BAUD_256000;
+        break;
+    default:
+        return false;
+    }
     return true;
 }
 
@@ -86,18 +162,18 @@ void OLED::reset()
 // Helper functions
 //
 
-String OLED::_convertDeviceType(uint8_t deviceTypeResponse)
+OLED::DeviceType OLED::_convertDeviceType(uint8_t deviceTypeResponse)
 {
     switch (deviceTypeResponse)
     {
     case OLED_DEVICETYPE_LCD:
-        return "LCD";
+        return uLCD;
     case OLED_DEVICETYPE_OLED:
-        return "OLED";
+        return uOLED;
     case OLED_DEVICETYPE_VGA:
-        return "VGA";
+        return VGA;
     default:
-        return "unknown";
+        return Unknown;
     }
 }
 
@@ -119,8 +195,9 @@ uint16_t OLED::_convertResolution(uint8_t resolutionResponse)
         return 220;
     case OLED_RES_320:
         return 320;
+    case OLED_RES_UNKNOWN:
     default:
-        return 0;
+        return 0xFFFF;
     }
 }
 
@@ -214,6 +291,29 @@ void OLED::writeString(String text)
     }
 }
 
+void OLED::writeSpatial(uint16_t value)
+{
+    if (_controllerType == Picaso)
+        writeShort(value);
+    else if (_controllerType == Goldelox)
+        write(value & 0xFF);
+}
+
+void OLED::writeSpatial(uint8_t numValues, uint16_t value1, ...)
+{
+    writeSpatial(value1);
+
+    va_list ap;
+    uint8_t current = 1;
+    va_start(ap, value1);
+    while (current < numValues)
+    {
+        writeSpatial((uint16_t)va_arg(ap, int));
+        current++;
+    }
+    va_end(ap);
+}
+
 
 bool OLED::getResponse(uint8_t& result)
 {
@@ -268,35 +368,58 @@ bool OLED::getDeviceInfo(bool displayOnScreen)
         !getResponse(response[2]) ||
         !getResponse(response[3]) ||
         !getResponse(response[4]) ||
-        // Revision values are in hex but represent integers (0x10 == 10)
         !OLEDUtil::readHexAsDec(response[1], hw) ||
         !OLEDUtil::readHexAsDec(response[2], fw))
         return false;
     
-
     _deviceType = _convertDeviceType(response[0]);
     _hardwareRevision = hw;
     _firmwareRevision = fw;
-    _deviceWidth = _convertResolution(response[3]);
-    _deviceHeight = _convertResolution(response[4]);
+    if (response[3] != OLED_RES_UNKNOWN &&
+        response[4] != OLED_RES_UNKNOWN)
+    {
+        _deviceWidth = _convertResolution(response[3]);
+        _deviceHeight = _convertResolution(response[4]);
+    }
+    else
+    {
+        _getDeviceResolution();
+    }
+
+    _controllerType = max(_deviceHeight, _deviceWidth) > 0xFF
+        ? Picaso
+        : Goldelox;
 
     return true;
 }
 
-String OLED::getDeviceType() { return _deviceType; }
-uint8_t OLED::getDeviceWidth()
+OLED::ControllerType OLED::getControllerType() { return _controllerType; }
+OLED::DeviceType OLED::getDeviceType() { return _deviceType; }
+uint16_t OLED::getDeviceWidth()
 { 
-    return _deviceWidth > 0xFF
-        ? 0 : (uint8_t)_deviceWidth;
+    return _deviceWidth;
 }
-uint8_t OLED::getDeviceHeight()
+uint16_t OLED::getDeviceHeight()
 {
-    return _deviceHeight > 0xFF
-        ? 0 : (uint8_t)_deviceHeight;
+    return _deviceHeight;
 }
 uint8_t OLED::getHardwareRevision() { return _hardwareRevision; }
 uint8_t OLED::getFirmwareRevision() { return _firmwareRevision; }
 
+bool OLED::_getDeviceResolution()
+{
+
+    write(OLED_CMD_GET_RESOLUTION);
+    uint16_t width, height;
+
+    if (!getResponseShort(width) ||
+        !getResponseShort(height))
+        return false;
+
+    _deviceWidth = width;
+    _deviceHeight = height;
+    return true;
+}
 
 bool OLED::clear()
 {
@@ -489,12 +612,13 @@ bool OLED::tune(uint8_t length, uint16_t note, uint16_t duration)
 // Graphics commands
 //
 
-bool OLED::readPixel(uint8_t x, uint8_t y, uint16_t& resultShort)
+bool OLED::readPixel(uint16_t x, uint16_t y, uint16_t& resultShort)
 {
     if (x < 0 || x >= getDeviceWidth() ||
         y < 0 || y >= getDeviceHeight())
         return false;
-    write(3, OLED_CMD_READ_PIXEL, x, y);
+    write(OLED_CMD_READ_PIXEL);
+    writeSpatial(2, x, y);
     
     if (!getResponseShort(resultShort))
         return false;
@@ -502,7 +626,7 @@ bool OLED::readPixel(uint8_t x, uint8_t y, uint16_t& resultShort)
     return true;
 }
 
-bool OLED::readPixel(uint8_t x, uint8_t y, Color& resultColor)
+bool OLED::readPixel(uint16_t x, uint16_t y, Color& resultColor)
 {
     uint16_t resultShort;
     if (!readPixel(x, y, resultShort))
@@ -512,68 +636,71 @@ bool OLED::readPixel(uint8_t x, uint8_t y, Color& resultColor)
 }
 
 
-bool OLED::drawPixel(uint8_t x, uint8_t y, uint16_t color)
+bool OLED::drawPixel(uint16_t x, uint16_t y, uint16_t color)
 {
-    write(3, OLED_CMD_DRAW_PIXEL, x, y);
+    write(OLED_CMD_DRAW_PIXEL);
+    writeSpatial(2, x, y);
     writeShort(color);
     return getAck();
 }
 
-bool OLED::drawPixel(uint8_t x, uint8_t y, Color color)
+bool OLED::drawPixel(uint16_t x, uint16_t y, Color color)
 {
     return drawPixel(x, y, color.to16BitRGB());
 }
 
 
-bool OLED::drawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16_t color)
+bool OLED::drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
 {
-    write(5, OLED_CMD_DRAW_LINE, x1, y1, x2, y2);
+    write(OLED_CMD_DRAW_LINE);
+    writeSpatial(4, x1, y1, x2, y2);
     writeShort(color);
     return getAck();
 }
 
-bool OLED::drawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, Color color)
+bool OLED::drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, Color color)
 {
     return drawLine(x1, y1, x2, y2, color.to16BitRGB());
 }
 
 
-bool OLED::drawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16_t color)
+bool OLED::drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
 {
-    write(5, OLED_CMD_DRAW_RECTANGLE, x1, y1, x2, y2);
+    write(OLED_CMD_DRAW_RECTANGLE);
+    writeSpatial(4, x1, y1, x2, y2);
     writeShort(color);
     return getAck();
 }
 
-bool OLED::drawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, Color color)
+bool OLED::drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, Color color)
 {
     return drawRectangle(x1,y1,x2,y2,color.to16BitRGB());
 }
 
-bool OLED::drawRectangleWH(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint16_t color)
+bool OLED::drawRectangleWH(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color)
 {
     if (width < 1 || height < 1)
         return false;
-    uint8_t x2 = x + (width-1);
-    uint8_t y2 = y + (height-1);
+    uint16_t x2 = x + (width-1);
+    uint16_t y2 = y + (height-1);
     return drawRectangle(x,y,x2,y2,color);
 }
 
-bool OLED::drawRectangleWH(uint8_t x, uint8_t y, uint8_t width, uint8_t height, Color color)
+bool OLED::drawRectangleWH(uint16_t x, uint16_t y, uint16_t width, uint16_t height, Color color)
 {
     return drawRectangleWH(x,y,width,height,color.to16BitRGB());
 }
 
-bool OLED::drawProgressBar(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
+bool OLED::drawProgressBar(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
     uint8_t progressPercent, uint16_t foreColor, uint16_t backColor)
 {
-    uint8_t progressWidth = width * progressPercent / 100;
+    uint16_t progressWidth = width * progressPercent / 100;
     return
         drawRectangleWH(x, y, progressWidth, height, foreColor) &&
         drawRectangleWH(x+progressWidth, y, width-progressWidth, height, backColor);
 }
 
-bool OLED::drawProgressBar(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
+bool OLED::drawProgressBar(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
     uint8_t progressPercent, Color foreColor, Color backColor)
 {
     return drawProgressBar(x, y, width, height,
@@ -581,22 +708,23 @@ bool OLED::drawProgressBar(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
 }
 
 
-bool OLED::drawTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3,
+bool OLED::drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3,
     uint16_t color)
 {
-    write(7, OLED_CMD_DRAW_TRIANGLE, x1, y1, x2, y2, x3, y3);
+    write(OLED_CMD_DRAW_TRIANGLE);
+    writeSpatial(6, x1, y1, x2, y2, x3, y3);
     writeShort(color);
     return getAck();
 }
 
-bool OLED::drawTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3,
+bool OLED::drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3,
     Color color)
 {
     return drawTriangle(x1,y1,x2,y2,x3,y3,color.to16BitRGB());
 }
 
 
-bool OLED::_drawPolygonVa(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, va_list ap)
+bool OLED::_drawPolygonVa(uint16_t color, uint8_t numVertices, uint16_t x1, uint16_t y1, va_list ap)
 {
     // Vertex count limited by the serial interface
     if (numVertices > OLED_MAX_POLYGON_VERTICES)
@@ -605,17 +733,18 @@ bool OLED::_drawPolygonVa(uint16_t color, uint8_t numVertices, uint8_t x1, uint8
     if (numVertices == 1)
         return drawPixel(x1, y1, color);
     if (numVertices == 2)
-        return drawLine(x1, y1, (uint8_t)va_arg(ap, int), (uint8_t)va_arg(ap, int), color);
+        return drawLine(x1, y1, (uint16_t)va_arg(ap, int), (uint16_t)va_arg(ap, int), color);
 
 
-    write(4, OLED_CMD_DRAW_POLYGON, numVertices, x1, y1);
+    write(2, OLED_CMD_DRAW_POLYGON, numVertices);
+    writeSpatial(2, x1, y1);
     for (uint8_t i = 1; i < numVertices; i++)
-        write(2, (uint8_t)va_arg(ap, int), (uint8_t)va_arg(ap, int));
+        writeSpatial(2, (uint16_t)va_arg(ap, int), (uint16_t)va_arg(ap, int));
     writeShort(color);
     return getAck();
 }
 
-bool OLED::drawPolygon(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, ...)
+bool OLED::drawPolygon(uint16_t color, uint8_t numVertices, uint16_t x1, uint16_t y1, ...)
 {
     va_list ap;
     va_start(ap, y1);
@@ -624,7 +753,7 @@ bool OLED::drawPolygon(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t 
     return result;
 }
 
-bool OLED::drawPolygon(Color color, uint8_t numVertices, uint8_t x1, uint8_t y1, ...)
+bool OLED::drawPolygon(Color color, uint8_t numVertices, uint16_t x1, uint16_t y1, ...)
 {
     va_list ap;
     va_start(ap, y1);
@@ -633,7 +762,7 @@ bool OLED::drawPolygon(Color color, uint8_t numVertices, uint8_t x1, uint8_t y1,
     return result;
 }
 
-bool OLED::drawPolygon(uint16_t color, uint8_t numVertices, uint8_t vertices[][2])
+bool OLED::drawPolygon(uint16_t color, uint8_t numVertices, uint16_t vertices[][2])
 {
     if (numVertices > OLED_MAX_POLYGON_VERTICES) return false;
     if (numVertices == 1)
@@ -643,24 +772,25 @@ bool OLED::drawPolygon(uint16_t color, uint8_t numVertices, uint8_t vertices[][2
     
     write(2, OLED_CMD_DRAW_POLYGON, numVertices);
     for (uint8_t v = 0; v < numVertices; v++)
-        write(2, vertices[v][0], vertices[v][1]);
+        writeSpatial(2, vertices[v][0], vertices[v][1]);
     writeShort(color);
     return getAck();
 }
 
-bool OLED::drawPolygon(Color color, uint8_t numVertices, uint8_t vertices[][2])
+bool OLED::drawPolygon(Color color, uint8_t numVertices, uint16_t vertices[][2])
 {
     return drawPolygon(color.to16BitRGB(), numVertices, vertices);
 }
 
-bool OLED::drawCircle(uint8_t x, uint8_t y, uint8_t radius, uint16_t color)
+bool OLED::drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color)
 {
-    write(4, OLED_CMD_DRAW_CIRCLE, x, y, radius);
+    write(OLED_CMD_DRAW_CIRCLE);
+    writeSpatial(3, x, y, radius);
     writeShort(color);
     return getAck();
 }
 
-bool OLED::drawCircle(uint8_t x, uint8_t y, uint8_t radius, Color color)
+bool OLED::drawCircle(uint16_t x, uint16_t y, uint16_t radius, Color color)
 {
     return drawCircle(x, y, radius, color.to16BitRGB());
 }
@@ -668,7 +798,7 @@ bool OLED::drawCircle(uint8_t x, uint8_t y, uint8_t radius, Color color)
 // NOT YET IMPLEMENTED
 // The width MUST match the width of the original image to display correctly.
 // Height can be anything <= original height, image will be truncated accordingly.
-bool OLED::drawImage8Bit(uint8_t x, uint8_t y, uint8_t imageWidth, uint8_t imageHeight,
+bool OLED::drawImage8Bit(uint16_t x, uint16_t y, uint16_t imageWidth, uint16_t imageHeight,
         uint8_t pixel1, ...)
 {
     return false;
@@ -681,7 +811,7 @@ bool OLED::drawImage8Bit(uint8_t x, uint8_t y, uint8_t imageWidth, uint8_t image
 // NOT YET IMPLEMENTED
 // The width MUST match the width of the original image to display correctly.
 // Height can be anything <= original height, image will be truncated accordingly.
-bool OLED::drawImage16Bit(uint8_t x, uint8_t y, uint8_t imageWidth, uint8_t imageHeight,
+bool OLED::drawImage16Bit(uint16_t x, uint16_t y, uint16_t imageWidth, uint16_t imageHeight,
         uint16_t pixel1, ...)
 {
     return false;
@@ -701,17 +831,18 @@ bool OLED::addUserBitmap(uint8_t charIndex,
     return getAck();
 }
 
-bool OLED::drawUserBitmap(uint8_t charIndex, uint8_t x, uint8_t y, uint16_t color)
+bool OLED::drawUserBitmap(uint8_t charIndex, uint16_t x, uint16_t y, uint16_t color)
 {
     if (!_charIndexList[charIndex])
         return false;
 
-    write(4, OLED_CMD_DRAW_USER_BITMAP, charIndex, x, y);
+    write(2, OLED_CMD_DRAW_USER_BITMAP, charIndex);
+    writeSpatial(2, x, y);
     writeShort(color);
     return getAck();
 }
 
-bool OLED::drawUserBitmap(uint8_t charIndex, uint8_t x, uint8_t y, Color color)
+bool OLED::drawUserBitmap(uint8_t charIndex, uint16_t x, uint16_t y, Color color)
 {
     return drawUserBitmap(charIndex, x, y, color.to16BitRGB());
 }
@@ -723,11 +854,11 @@ bool OLED::setFill(bool fillShapes)
     return getAck();
 }
 
-bool OLED::screenCopyPaste(uint8_t sourceX, uint8_t sourceY, uint8_t destX, uint8_t destY,
-    uint8_t sourceWidth, uint8_t sourceHeight)
+bool OLED::screenCopyPaste(uint16_t sourceX, uint16_t sourceY, uint16_t destX, uint16_t destY,
+    uint16_t sourceWidth, uint16_t sourceHeight)
 {
-    write(7, OLED_CMD_SCREEN_COPY_PASTE, sourceX, sourceY, destX, destY,
-        sourceWidth, sourceHeight);
+    write(OLED_CMD_SCREEN_COPY_PASTE);
+    writeSpatial(6, sourceX, sourceY, destX, destY, sourceWidth, sourceHeight);
     return getAck();
 }
 
@@ -868,7 +999,7 @@ bool OLED::drawText(uint8_t col, uint8_t row, String text)
 }
 
 
-bool OLED::drawTextGraphic(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height,
+bool OLED::drawTextGraphic(uint16_t x, uint16_t y, String text, uint8_t width, uint8_t height,
     uint16_t color, uint8_t fontSize, uint8_t opacity, uint8_t proportional)
 {
     if (!_checkDrawTextParameters(fontSize, opacity, proportional) ||
@@ -887,7 +1018,9 @@ bool OLED::drawTextGraphic(uint8_t x, uint8_t y, String text, uint8_t width, uin
         setFontOpacity(opacity == OLED_FONT_OPAQUE);
 
     bool result;
-    write(4, OLED_CMD_DRAW_STRING_GFX, x, y, fontSize | proportional);
+    write(OLED_CMD_DRAW_STRING_GFX);
+    writeSpatial(2, x, y);
+    write(fontSize | proportional);
     writeShort(color);
     write(2, width, height);
     writeString(text);
@@ -900,25 +1033,25 @@ bool OLED::drawTextGraphic(uint8_t x, uint8_t y, String text, uint8_t width, uin
     return result;
 }
 
-bool OLED::drawTextGraphic(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height,
+bool OLED::drawTextGraphic(uint16_t x, uint16_t y, String text, uint8_t width, uint8_t height,
     Color color, uint8_t fontSize, uint8_t opacity, uint8_t proportional)
 {
     return drawTextGraphic(x,y,text,width,height,color.to16BitRGB(),fontSize,opacity,proportional);
 }
 
-bool OLED::drawTextGraphic(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height)
+bool OLED::drawTextGraphic(uint16_t x, uint16_t y, String text, uint8_t width, uint8_t height)
 {
     return drawTextGraphic(x, y, text, width, height, _fontColor,
         OLED_FONT_SIZE_NOT_SET, OLED_FONT_OPACITY_NOT_SET, OLED_FONT_PROPORTIONAL_NOT_SET);
 }
 
-bool OLED::drawTextGraphic(uint8_t x, uint8_t y, String text)
+bool OLED::drawTextGraphic(uint16_t x, uint16_t y, String text)
 {
     return drawTextGraphic(x, y, text, 1, 1);
 }
 
 
-bool OLED::drawTextButton(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height,
+bool OLED::drawTextButton(uint16_t x, uint16_t y, String text, uint8_t width, uint8_t height,
     bool pressed, uint16_t fontColor, uint16_t buttonColor,
     uint8_t fontSize, uint8_t opacity, uint8_t proportional)
 {
@@ -947,9 +1080,9 @@ bool OLED::drawTextButton(uint8_t x, uint8_t y, String text, uint8_t width, uint
     }
 
     bool result;
-    write(4, OLED_CMD_DRAW_STRING_BUTTON,
-        pressed ? OLED_PRM_BUTTON_DOWN : OLED_PRM_BUTTON_UP,
-        x, y);
+    write(2, OLED_CMD_DRAW_STRING_BUTTON,
+        pressed ? OLED_PRM_BUTTON_DOWN : OLED_PRM_BUTTON_UP);
+    writeSpatial(2, x, y);
     writeShort(buttonColor);
     write(fontSize | proportional);
     writeShort(fontColor);
@@ -967,7 +1100,7 @@ bool OLED::drawTextButton(uint8_t x, uint8_t y, String text, uint8_t width, uint
     return result;
 }
 
-bool OLED::drawTextButton(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height,
+bool OLED::drawTextButton(uint16_t x, uint16_t y, String text, uint8_t width, uint8_t height,
     bool pressed, Color fontColor, Color buttonColor,
     uint8_t fontSize, uint8_t opacity, uint8_t proportional)
 {
@@ -976,7 +1109,7 @@ bool OLED::drawTextButton(uint8_t x, uint8_t y, String text, uint8_t width, uint
         fontSize, opacity, proportional);
 }
 
-bool OLED::drawTextButton(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height,
+bool OLED::drawTextButton(uint16_t x, uint16_t y, String text, uint8_t width, uint8_t height,
     bool pressed)
 {
     return drawTextButton(x, y, text, width, height, pressed, _fontColor, _buttonColor,
@@ -1252,8 +1385,8 @@ bool OLED::SDWipeSectors(uint32_t sectorAddress, uint32_t numSectors,
     if (numSectors == 0)
         return true;
 
-    uint8_t height = getDeviceHeight();
-    uint8_t width = getDeviceWidth();
+    uint16_t height = getDeviceHeight();
+    uint16_t width = getDeviceWidth();
 
     bool success = true;
     for (uint32_t sector = sectorAddress; sector < numSectors; sector++)
@@ -1314,20 +1447,22 @@ uint32_t OLED::SDWipeCard(uint8_t wipeData)
 }
 */
 
-bool OLED::SDWriteScreen(uint32_t sectorAddress)
-{
-    return SDWriteScreen(sectorAddress, 0, 0, getDeviceWidth(), getDeviceHeight());
-}
 
 bool OLED::SDWriteScreen(uint32_t sectorAddress,
-    uint8_t x, uint8_t y, uint8_t width, uint8_t height)
+    uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
-    write(9, OLED_CMD_EXTENDED_SD, OLED_CMD_SD_WRITE_SCREENSHOT,
-        x, y, width, height,
+    write(2, OLED_CMD_EXTENDED_SD, OLED_CMD_SD_WRITE_SCREENSHOT);
+    writeSpatial(4, x, y, width, height);
+    write(3,
         OLEDUtil::getByte(sectorAddress, 2),
         OLEDUtil::getByte(sectorAddress, 1),
         OLEDUtil::getByte(sectorAddress));
     return getAck();
+}
+
+bool OLED::SDWriteScreen(uint32_t sectorAddress)
+{
+    return SDWriteScreen(sectorAddress, 0, 0, getDeviceWidth(), getDeviceHeight());
 }
 
  bool OLED::SDDrawScreen(uint32_t sectorAddress)
@@ -1338,10 +1473,11 @@ bool OLED::SDWriteScreen(uint32_t sectorAddress,
 // The width MUST match the width of the original image to display correctly.
 // Height can be anything <= original height, image will be truncated accordingly.
 bool OLED::SDDrawImage(uint32_t sectorAddress,
-    uint8_t x, uint8_t y, uint8_t width, uint8_t height)
+    uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
-    write(10, OLED_CMD_EXTENDED_SD, OLED_CMD_SD_DISPLAY_IMAGE,
-        x, y, width, height, OLED_PRM_DRAW_IMAGE_16BIT,
+    write(2, OLED_CMD_EXTENDED_SD, OLED_CMD_SD_DISPLAY_IMAGE);
+    writeSpatial(4, x, y, width, height);
+    write(4, OLED_PRM_DRAW_IMAGE_16BIT,
         OLEDUtil::getByte(sectorAddress, 2),
         OLEDUtil::getByte(sectorAddress, 1),
         OLEDUtil::getByte(sectorAddress));
@@ -1356,11 +1492,12 @@ bool OLED::SDRunCommand(uint32_t address)
 }
 
 // UNTESTED!!!
-bool OLED::SDPlayVideo(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
+bool OLED::SDPlayVideo(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
     uint8_t delayMs, uint16_t frameCount, uint32_t sectorAddress)
 {
-    write(8, OLED_CMD_EXTENDED_SD, OLED_CMD_SD_DISPLAY_VIDEO,
-        x, y, width, height, OLED_PRM_DRAW_IMAGE_16BIT, delayMs);
+    write(2, OLED_CMD_EXTENDED_SD, OLED_CMD_SD_DISPLAY_VIDEO);
+    writeSpatial(4, x, y, width, height);
+    write(2, OLED_PRM_DRAW_IMAGE_16BIT, delayMs);
     writeShort(frameCount);
     write(3,
         OLEDUtil::getByte(sectorAddress, 2),
