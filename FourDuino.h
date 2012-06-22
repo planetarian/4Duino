@@ -29,6 +29,7 @@
 #define OLED_FONT_OPACITY_DEFAULT       false
 #define OLED_FONT_PROPORTIONAL_DEFAULT  false
 #define OLED_BUTTON_OPACITY_DEFAULT     false
+#define OLED_SHAPE_FILL_DEFAULT         false
 
 #define OLED_FONT_COLOR_DEFAULT             Color::from32BitRGB(0xFFFFFF) // COLOR_WHITE
 #define OLED_BUTTON_FONT_COLOR_DEFAULT      Color::from32BitRGB(0xC0C0C0) // COLOR_SILVER
@@ -61,6 +62,14 @@
 #define OLED_CMD_INPUT_STATUS_WAIT  0x6A
 #define OLED_CMD_SOUND              0x4E
 #define OLED_CMD_TUNE               0x6E
+// PICASO only
+#define OLED_CMD_BAUD               0x51
+#define OLED_CMD_GET_RESOLUTION     0x64
+#define OLED_CMD_SET_VOLUME         0x76
+#define OLED_CMD_PIN_READ           0x61
+#define OLED_CMD_PIN_WRITE          0x69
+#define OLED_CMD_BUS_READ           0x79
+#define OLED_CMD_BUS_WRITE          0x57
 
 #define OLED_PRM_CTLFUNC_NA         0x00
 #define OLED_PRM_CTLFUNC_POWER      0x01
@@ -73,6 +82,25 @@
 #define OLED_PRM_SLEEP_SD_OFF       0x80
 #define OLED_PRM_SLEEP_WAKE_JOY     0x02
 #define OLED_PRM_SLEEP_WAKE_SERIAL  0x01
+// PICASO only
+#define OLED_PRM_BAUD_110           0x00
+#define OLED_PRM_BAUD_300           0x01
+#define OLED_PRM_BAUD_600           0x02
+#define OLED_PRM_BAUD_1200          0x03
+#define OLED_PRM_BAUD_2400          0x04
+#define OLED_PRM_BAUD_4800          0x05
+#define OLED_PRM_BAUD_9600          0x06
+#define OLED_PRM_BAUD_14400         0x07
+#define OLED_PRM_BAUD_19200         0x08
+#define OLED_PRM_BAUD_31250         0x09
+#define OLED_PRM_BAUD_38400         0x0A
+#define OLED_PRM_BAUD_56000         0x0B
+#define OLED_PRM_BAUD_57600         0x0C
+#define OLED_PRM_BAUD_115200        0x0D
+#define OLED_PRM_BAUD_129032        0x0E
+#define OLED_PRM_BAUD_282353        0x0F
+#define OLED_PRM_BAUD_128000        0x10
+#define OLED_PRM_BAUD_256000        0x11
 
 #define OLED_DEVICETYPE_OLED        0x00
 #define OLED_DEVICETYPE_LCD         0x01
@@ -84,7 +112,8 @@
 #define OLED_RES_160                0x60
 #define OLED_RES_176                0x76
 #define OLED_RES_220                0x22
-#define OLED_RES_320                0x32 // Not currently supported
+#define OLED_RES_320                0x32
+#define OLED_RES_UNKNOWN            0xFF
 #define OLED_CONTRAST_MAX           15
 
 //
@@ -164,10 +193,12 @@
 #define OLED_SD_READ_STRING_MAX_LENGTH      2048
 
 
-
 class OLED
 {
 public:
+    enum ControllerType { Goldelox, Picaso };
+    enum DeviceType { uOLED, uLCD, VGA, Unknown };
+
     OLED(uint8_t pinReset, HardwareSerial serial,
         uint32_t baudRate = OLED_BAUD_DEFAULT, uint16_t initDelay = OLED_INIT_DELAY_MS);
     OLED(uint8_t pinReset, SoftwareSerial serial,
@@ -182,6 +213,9 @@ public:
     void writeLong(uint8_t numValues, uint32_t value1, ...);
     void writeText(char* text);
     void writeString(String text);
+    // Writes either a byte or a short based on device type
+    void writeSpatial(uint16_t value);
+    void writeSpatial(uint8_t numValues, uint16_t value1, ...);
     
     bool getResponse(uint8_t& result);
     bool getResponseShort(uint16_t& result);
@@ -191,10 +225,12 @@ public:
     void reset();
 
     // General
+    bool setBaud(uint32_t baudRate);
     bool getDeviceInfo(bool displayOnScreen);
-    String getDeviceType();
-    uint8_t getDeviceWidth();
-    uint8_t getDeviceHeight();
+    DeviceType getDeviceType();
+    ControllerType getControllerType();
+    uint16_t getDeviceWidth();
+    uint16_t getDeviceHeight();
     uint8_t getHardwareRevision();
     uint8_t getFirmwareRevision();
     bool clear();
@@ -215,46 +251,46 @@ public:
     bool tune(uint8_t length, uint16_t note, uint16_t duration = 0);
 
     // Graphics
-    bool readPixel(uint8_t x, uint8_t y, uint16_t& resultShort);
-    bool readPixel(uint8_t x, uint8_t y, Color& resultColor);
-    bool drawPixel(uint8_t x, uint8_t y, uint16_t color);
-    bool drawPixel(uint8_t x, uint8_t y, Color color);
-    bool drawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16_t color);
-    bool drawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, Color color);
-    bool drawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16_t color);
-    bool drawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, Color color);
-    bool drawRectangleWH(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint16_t color);
-    bool drawRectangleWH(uint8_t x, uint8_t y, uint8_t width, uint8_t height, Color color);
-    bool drawProgressBar(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
+    bool readPixel(uint16_t x, uint16_t y, uint16_t& resultShort);
+    bool readPixel(uint16_t x, uint16_t y, Color& resultColor);
+    bool drawPixel(uint16_t x, uint16_t y, uint16_t color);
+    bool drawPixel(uint16_t x, uint16_t y, Color color);
+    bool drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+    bool drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, Color color);
+    bool drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+    bool drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, Color color);
+    bool drawRectangleWH(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color);
+    bool drawRectangleWH(uint16_t x, uint16_t y, uint16_t width, uint16_t height, Color color);
+    bool drawProgressBar(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
         uint8_t progressPercent, uint16_t foreColor, uint16_t backColor);
-    bool drawProgressBar(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
+    bool drawProgressBar(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
         uint8_t progressPercent, Color foreColor, Color backColor);
-    bool drawTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3,
+    bool drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3,
         uint16_t color);
-    bool drawTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3,
+    bool drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3,
         Color color);
-    bool drawPolygon(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, ...);
-    bool drawPolygon(Color color, uint8_t numVertices, uint8_t x1, uint8_t y1, ...);
-    bool drawPolygon(uint16_t color, uint8_t numVertices, uint8_t vertices[][2]);
-    bool drawPolygon(Color color, uint8_t numVertices, uint8_t vertices[][2]);
-    bool drawCircle(uint8_t x, uint8_t y, uint8_t radius, uint16_t color);
-    bool drawCircle(uint8_t x, uint8_t y, uint8_t radius, Color color);
+    bool drawPolygon(uint16_t color, uint8_t numVertices, uint16_t x1, uint16_t y1, ...);
+    bool drawPolygon(Color color, uint8_t numVertices, uint16_t x1, uint16_t y1, ...);
+    bool drawPolygon(uint16_t color, uint8_t numVertices, uint16_t vertices[][2]);
+    bool drawPolygon(Color color, uint8_t numVertices, uint16_t vertices[][2]);
+    bool drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color);
+    bool drawCircle(uint16_t x, uint16_t y, uint16_t radius, Color color);
     bool addUserBitmap(uint8_t char_index,
         uint8_t data1, uint8_t data2, uint8_t data3, uint8_t data4,
         uint8_t data5, uint8_t data6, uint8_t data7, uint8_t data8);
-    bool drawUserBitmap(uint8_t charIndex, uint8_t x, uint8_t y, uint16_t color);
-    bool drawUserBitmap(uint8_t charIndex, uint8_t x, uint8_t y, Color color);
+    bool drawUserBitmap(uint8_t charIndex, uint16_t x, uint16_t y, uint16_t color);
+    bool drawUserBitmap(uint8_t charIndex, uint16_t x, uint16_t y, Color color);
     bool setFill(bool fillShapes);
-    bool screenCopyPaste(uint8_t xs, uint8_t ys, uint8_t xd, uint8_t yd,
-        uint8_t sourceWidth, uint8_t sourceHeight);
+    bool screenCopyPaste(uint16_t xs, uint16_t ys, uint16_t xd, uint16_t yd,
+        uint16_t sourceWidth, uint16_t sourceHeight);
     bool setBackground(uint16_t color);
     bool setBackground(Color color);
     bool replaceBackground(uint16_t color);
     bool replaceBackground(Color color);
     // TODO
-    bool drawImage8Bit(uint8_t x, uint8_t y, uint8_t imageWidth, uint8_t imageHeight,
+    bool drawImage8Bit(uint16_t x, uint16_t y, uint16_t imageWidth, uint16_t imageHeight,
         uint8_t pixel1, ...);
-    bool drawImage16Bit(uint8_t x, uint8_t y, uint8_t imageWidth, uint8_t imageHeight,
+    bool drawImage16Bit(uint16_t x, uint16_t y, uint16_t imageWidth, uint16_t imageHeight,
         uint16_t pixel1, ...);
 
     // Text
@@ -275,25 +311,25 @@ public:
         uint8_t fontSize = OLED_FONT_SIZE_NOT_SET, uint8_t opacity = OLED_FONT_OPACITY_NOT_SET,
         uint8_t proportional = OLED_FONT_PROPORTIONAL_NOT_SET);
     bool drawText(uint8_t col, uint8_t row, String text);
-    bool drawTextGraphic(uint8_t x, uint8_t y, String text,
+    bool drawTextGraphic(uint16_t x, uint16_t y, String text,
         uint8_t width, uint8_t height, uint16_t color,
         uint8_t fontSize = OLED_FONT_SIZE_NOT_SET, uint8_t opacity = OLED_FONT_OPACITY_NOT_SET,
         uint8_t proportional = OLED_FONT_PROPORTIONAL_NOT_SET);
-    bool drawTextGraphic(uint8_t x, uint8_t y, String text,
+    bool drawTextGraphic(uint16_t x, uint16_t y, String text,
         uint8_t width, uint8_t height, Color color,
         uint8_t fontSize = OLED_FONT_SIZE_NOT_SET, uint8_t opacity = OLED_FONT_OPACITY_NOT_SET,
         uint8_t proportional = OLED_FONT_PROPORTIONAL_NOT_SET);
-    bool drawTextGraphic(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height);
-    bool drawTextGraphic(uint8_t x, uint8_t y, String text);
-    bool drawTextButton(uint8_t x, uint8_t y, String text,
+    bool drawTextGraphic(uint16_t x, uint16_t y, String text, uint8_t width, uint8_t height);
+    bool drawTextGraphic(uint16_t x, uint16_t y, String text);
+    bool drawTextButton(uint16_t x, uint16_t y, String text,
         uint8_t width, uint8_t height, bool pressed, uint16_t fontColor, uint16_t buttonColor,
         uint8_t fontSize = OLED_FONT_SIZE_NOT_SET, uint8_t opacity = OLED_FONT_OPACITY_NOT_SET,
         uint8_t proportional = OLED_FONT_PROPORTIONAL_NOT_SET);
-    bool drawTextButton(uint8_t x, uint8_t y, String text,
+    bool drawTextButton(uint16_t x, uint16_t y, String text,
         uint8_t width, uint8_t height, bool pressed, Color fontColor, Color buttonColor,
         uint8_t fontSize = OLED_FONT_SIZE_NOT_SET, uint8_t opacity = OLED_FONT_OPACITY_NOT_SET,
         uint8_t proportional = OLED_FONT_PROPORTIONAL_NOT_SET);
-    bool drawTextButton(uint8_t x, uint8_t y, String text, uint8_t width, uint8_t height,
+    bool drawTextButton(uint16_t x, uint16_t y, String text, uint8_t width, uint8_t height,
         bool pressed);
 
     // SD Card
@@ -327,22 +363,26 @@ public:
     
     bool SDWriteScreen(uint32_t sectorAddress);
     bool SDWriteScreen(uint32_t sectorAddress,
-        uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+        uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     bool SDDrawScreen(uint32_t sectorAddress);
     bool SDDrawImage(uint32_t sectorAddress,
-        uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+        uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     bool SDRunCommand(uint32_t address);
-    bool SDPlayVideo(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
+    bool SDPlayVideo(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
         uint8_t delayMs, uint16_t frameCount, uint32_t sectorAddress);
     bool SDRunScript(uint32_t address);
 
 private:
-    String _convertDeviceType(uint8_t deviceTypeResponse);
+    bool _getDeviceResolution();
+
+    bool _getBaudByte(uint32_t baudRate, uint8_t &baudByte);
+
+    DeviceType _convertDeviceType(uint8_t deviceTypeResponse);
     uint16_t _convertResolution(uint8_t resolutionResponse);
 
     static bool _checkDrawTextParameters(uint8_t fontSize, uint8_t opacity, uint8_t proportional);
 
-    bool _drawPolygonVa(uint16_t color, uint8_t numVertices, uint8_t x1, uint8_t y1, va_list ap);
+    bool _drawPolygonVa(uint16_t color, uint8_t numVertices, uint16_t x1, uint16_t y1, va_list ap);
 
     uint8_t _pinReset;
     uint16_t _initDelay;
@@ -350,7 +390,8 @@ private:
     
     SerialContainer *_serial;
 
-    String _deviceType;
+    ControllerType _controllerType;
+    DeviceType _deviceType;
     uint8_t _hardwareRevision;
     uint8_t _firmwareRevision;
     uint16_t _deviceWidth;
