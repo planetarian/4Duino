@@ -52,12 +52,12 @@ int RxPin = 10;
 // Should work on any device
 // You can use Serial* but you still have to #include "SoftwareSerial.h"
 // OLED(resetPin, serialInterface)
-OLED oled = OLED(resetPin, SoftwareSerial(RxPin,TxPin));
+OLED oled = OLED(8, SoftwareSerial(10,9), 38400); // This is the maximum safe baud for 4.3" uLCD
 
 // Shape colors
 uint16_t color[NUM_SHAPES];
 // Position of shape vertices
-uint8_t pos[NUM_SHAPES][NUM_POINTS][2];
+uint16_t pos[NUM_SHAPES][NUM_POINTS][2];
 // Movement vectors for shape vertices
 // Determines direction and velocity
 int8_t vector[NUM_SHAPES][NUM_POINTS][2];
@@ -131,5 +131,5 @@ void loop()
         oled.drawPolygon(color[s], NUM_POINTS, pos[s]);
     }
 
-    delay(10);
+    delay(1);
 }
