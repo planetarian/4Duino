@@ -161,6 +161,7 @@
 #define OLED_FONT_SMALL             0x00
 #define OLED_FONT_MEDIUM            0x01
 #define OLED_FONT_LARGE             0x02
+#define OLED_FONT_EXTRA_LARGE             0x03
 #define OLED_FONT_SIZE_NOT_SET      0xFF
 #define OLED_FONT_TRANSPARENT       0x00
 #define OLED_FONT_OPAQUE            0x01

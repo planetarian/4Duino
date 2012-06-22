@@ -897,7 +897,9 @@ bool OLED::setFont(uint8_t fontSize)
 {
     if (fontSize != OLED_FONT_SMALL &&
         fontSize != OLED_FONT_MEDIUM &&
-        fontSize != OLED_FONT_LARGE)
+        fontSize != OLED_FONT_LARGE &&
+            (_controllerType == Goldelox ||
+            fontSize != OLED_FONT_EXTRA_LARGE))
         return false;
     write(2, OLED_CMD_SET_FONT, fontSize);
     bool result = getAck();
